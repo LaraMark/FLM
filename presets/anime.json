@@ -1,5 +1,5 @@
 {
-    "default_model": "dreamshaper_8.safetensors",
+    "default_model": "animaPencilXL_v100.safetensors",
     "default_refiner": 0.5,
     "default_refiner_switch": 1.0,
     "default_loras": [
@@ -43,11 +43,11 @@
     ],
     "default_aspect_ratio": "896*1152",
     "checkpoint_downloads": {
-        "dreamshaper_8.safetensors": "https://civitai.com/api/download/models/128713"
+        "animaPencilXL_v100.safetensors": "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/animaPencilXL_v100.safetensors
     },
     "embeddings_downloads": {},
     "lora_downloads": {
-		"more_details.safetensors": "https://civitai.com/api/download/models/87153"
+		"more_details.safetensors": "https://huggingface.co/yungplin/More_details/blob/main/more_details.safetensors"
 	},
     "previous_default_models": []
 }
