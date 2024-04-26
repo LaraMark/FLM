@@ -34,12 +34,12 @@
     "default_sampler": "dpmpp_2m_sde_gpu",
     "default_scheduler": "karras",
     "default_performance": "Speed",
-    "default_prompt": "Hitomi Tanaka",
-    "default_prompt_negative": "none auto fixing",
+    "default_prompt": "Tifa Lockhart",
+    "default_prompt_negative": "worst quality, poorly drawn, bad art, boring, deformed, bad composition, crappy artwork, bad lighting",
     "default_styles": [
         "Fooocus V2",
     ],
-    "default_aspect_ratio": "896*1152",
+    "default_aspect_ratio": "720*1280",
     "checkpoint_downloads": {
         "animaPencilXL_v100.safetensors": "https://huggingface.co/lllyasviel/fav_models/resolve/main/fav/animaPencilXL_v100.safetensors"
     },
