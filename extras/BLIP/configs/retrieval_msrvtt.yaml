@@ -1,12 +1,29 @@
-video_root: '/export/share/dongxuli/data/msrvtt_retrieval/videos'
-ann_root: 'annotation'
+# The root directory of the video files for the MSR-VTT retrieval task
+video_root = '/export/share/dongxuli/data/msrvtt_retrieval/videos'
 
-# set pretrained as a file path or an url
-pretrained: 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth'
+# The root directory of the annotations for the MSR-VTT retrieval task
+ann_root = 'annotation'
 
-# size of vit model; base or large
-vit: 'base'
-batch_size: 64
-k_test: 128
-image_size: 384
-num_frm_test: 8
+# The file path or URL of the pre-trained model for video-text retrieval
+# This model is a Bidirectional Encoder Representations from Transformers (BERT) model
+pretrained = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_retrieval_coco.pth'
+
+# The size of the Vision Transformer (ViT) model; either 'base' or 'large'
+# The ViT model is a type of neural network architecture that is commonly used in computer vision tasks
+vit = 'base'
+
+# The batch size for training and testing the video-text retrieval model
+# This parameter determines the number of samples that are processed simultaneously during each iteration of the training or testing process
+batch_size = 64
+
+# The number of top-k video candidates to retrieve for each query during testing
+# This parameter determines the number of videos that are returned as potential matches for a given query
+k_test = 128
+
+# The size of the input images for the video-text retrieval model
+# This parameter determines the resolution of the input images and affects the computational cost of the model
+image_size = 384
+
+# The number of frames to sample from each video during testing
+# This parameter determines the number of frames that are extracted from each video and used as input to the video-text retrieval model
+num_frm_test = 8
