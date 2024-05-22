@@ -1,6 +1,6 @@
-*.json
-!anime.json
-!default.json
-!lcm.json
-!realistic.json
-!sai.json
+*.json  # Ignore all JSON files
+!anime.json  # Except for the 'anime.json' file
+!default.json  # Except for the 'default.json' file
+!lcm.json  # Except for the 'lcm.json' file
+!realistic.json  # Except for the 'realistic.json' file
+!sai.json  # Except for the 'sai.json' file
