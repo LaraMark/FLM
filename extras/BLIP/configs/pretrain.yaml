@@ -1,27 +1,52 @@
-train_file: ['/export/share/junnan-li/VL_pretrain/annotation/coco_karpathy_train.json',
-             '/export/share/junnan-li/VL_pretrain/annotation/vg_caption.json',
-             ]
-laion_path: ''   
+# Define the paths to the train files for COCO and Visual Genome datasets
+train_file = ['/export/share/junnan-li/VL_pretrain/annotation/coco_karpathy_train.json',
+              '/export/share/junnan-li/VL_pretrain/annotation/vg_caption.json']
 
-# size of vit model; base or large
-vit: 'base'
-vit_grad_ckpt: False
-vit_ckpt_layer: 0
+# Path to LAION dataset
+laion_path = ''
 
-image_size: 224
-batch_size: 75
+# Specify the size of the Vision Transformer (ViT) model to use
+# Options are 'base' or 'large'
+vit = 'base'
 
-queue_size: 57600
-alpha: 0.4
+# Indicate whether to use gradient checkpoints for the ViT model
+# If True, this will save memory but increase training time
+vit_grad_ckpt = False
 
-# optimizer
-weight_decay: 0.05
-init_lr: 3e-4
-min_lr: 1e-6
-warmup_lr: 1e-6
-lr_decay_rate: 0.9
-max_epoch: 20
-warmup_steps: 3000
+# Specify the layer at which to resume training for the ViT model
+# If vit_grad_ckpt is True, this must be set to a value greater than 0
+vit_ckpt_layer = 0
 
+# Set the image size for the input images
+image_size = 224
 
+# Define the batch size for training
+batch_size = 75
 
+# Set the size of the queue for the gradient accumulation buffer
+queue_size = 57600
+
+# Define the alpha parameter for the gradient accumulation buffer
+alpha = 0.4
+
+# Define the optimization hyperparameters
+# Weight decay value for the optimizer
+weight_decay = 0.05
+
+# Initial learning rate for the optimizer
+init_lr = 3e-4
+
+# Minimum learning rate for the optimizer
+min_lr = 1e-6
+
+# Warmup learning rate for the optimizer
+warmup_lr = 1e-6
+
+# Learning rate decay rate for the optimizer
+lr_decay_rate = 0.9
+
+# Maximum number of epochs for training
+max_epoch = 20
+
+# Number of warmup steps for the learning rate scheduler
+warmup_steps = 3000
