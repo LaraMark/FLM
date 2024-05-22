@@ -1,17 +1,23 @@
-aqua
-black
-blue
-fuchsia
-gray
-green
-lime
-maroon
-navy
-olive
-orange
-purple
-red
-silver
-teal
-white
-yellow
+// Define a list of common color constants
+const aqua = "aqua";
+const black = "black";
+const blue = "blue";
+const fuchsia = "fuchsia";
+const gray = "gray";
+const green = "green";
+const lime = "lime";
+const maroon = "maroon";
+const navy = "navy";
+const olive = "olive";
+const orange = "orange";
+const purple = "purple";
+const red = "red";
+const silver = "silver";
+const teal = "teal";
+const white = "white";
+const yellow = "yellow";
+
+// These constants represent common colors that can be used in various parts of the application,
+// such as in user interfaces, graphics, or styling. By defining them as constants, we ensure
+// that the color values are consistent throughout the codebase, and can be easily updated if
+// needed.
