@@ -6,30 +6,59 @@ import sys
 import re
 import logging
 
-
+# Configure logging for torch.distributed.nn to only show ERROR level logs
 logging.getLogger("torch.distributed.nn").setLevel(logging.ERROR)  # sshh...
+
+# Configure logging for xformers to exclude records with the message 'A matching Triton is not available'
 logging.getLogger("xformers").addFilter(lambda record: 'A matching Triton is not available' not in record.getMessage())
 
+# Regular expression pattern for matching package requirements in the format: package [== version]
 re_requirement = re.compile(r"\s*([-_a-zA-Z0-9]+)\s*(?:==\s*([-+_.a-zA-Z0-9]+))?\s*")
 
+# Set the path to the Python executable
 python = sys.executable
+
+# Determine if the environment variable LAUNCH_LIVE_OUTPUT is set to 1
 default_command_live = (os.environ.get('LAUNCH_LIVE_OUTPUT') == "1")
+
+# Set the index URL for pip installations
 index_url = os.environ.get('INDEX_URL', "")
 
+# Set the path to the directory containing the modules
 modules_path = os.path.dirname(os.path.realpath(__file__))
+
+# Set the path to the directory containing the script
 script_path = os.path.dirname(modules_path)
 
-
 def is_installed(package):
+    """Check if a package is installed in the current environment."""
     try:
+        # Attempt to find the package using importlib.util.find_spec()
         spec = importlib.util.find_spec(package)
     except ModuleNotFoundError:
+        # If the package is not found, return False
         return False
 
+    # If the package is found, return True
     return spec is not None
 
-
 def run(command, desc=None, errdesc=None, custom_env=None, live: bool = default_command_live) -> str:
+    """
+    Run a command and capture its output.
+
+    Args:
+    - command (str): The command to run.
+    - desc (str, optional): Description of the command to print before running it.
+    - errdesc (str, optional): Description of the error to print if the command fails.
+    - custom_env (dict, optional): Custom environment variables to use when running the command.
+    - live (bool, optional): Whether to run the command in live mode (i.e., print the output as it is generated).
+
+    Returns:
+    - str: The output of the command.
+
+    Raises:
+    - RuntimeError: If the command fails.
+    """
     if desc is not None:
         print(desc)
 
@@ -60,8 +89,21 @@ def run(command, desc=None, errdesc=None, custom_env=None, live: bool = default_
 
     return (result.stdout or "")
 
-
 def run_pip(command, desc=None, live=default_command_live):
+    """
+    Run a pip command and capture its output.
+
+    Args:
+    - command (str): The pip command to run.
+    - desc (str, optional): Description of the command to print before running it.
+    - live (bool, optional): Whether to run the command in live mode (i.e., print the output as it is generated).
+
+    Returns:
+    - str: The output of the pip command.
+
+    Raises:
+    - Exception: If the pip command fails.
+    """
     try:
         index_url_line = f' --index-url {index_url}' if index_url != '' else ''
         return run(f'"{python}" -m pip {command} --prefer-binary{index_url_line}', desc=f"Installing {desc}",
@@ -71,11 +113,15 @@ def run_pip(command, desc=None, live=default_command_live):
         print(f'CMD Failed {desc}: {command}')
         return None
 
-
 def requirements_met(requirements_file):
     """
-    Does a simple parse of a requirements.txt file to determine if all rerqirements in it
-    are already installed. Returns True if so, False if not installed or parsing fails.
+    Check if all requirements in a requirements.txt file are already installed.
+
+    Args:
+    - requirements_file (str): The path to the requirements.txt file.
+
+    Returns:
+    - bool: True if all requirements are met, False otherwise.
     """
 
     import importlib.metadata
