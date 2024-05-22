@@ -1,18 +1,40 @@
 import torch
 
 
+# Alias for torch.Tensor
 Tensor = torch.Tensor
+# Alias for torch.DeviceObjType
 Device = torch.DeviceObjType
+# Alias for torch.Type
 Dtype = torch.Type
+# Alias for torch.nn.functional.pad
 pad = torch.nn.functional.pad
 
 
 def _compute_zero_padding(kernel_size: tuple[int, int] | int) -> tuple[int, int]:
+    """
+    Computes the zero padding required for a given kernel size.
+
+    Args:
+    kernel_size (tuple[int, int] | int): Kernel size for convolution or padding.
+
+    Returns:
+    tuple[int, int]: A tuple of two integers representing the padding in the y and x dimensions.
+    """
     ky, kx = _unpack_2d_ks(kernel_size)
     return (ky - 1) // 2, (kx - 1) // 2
 
 
 def _unpack_2d_ks(kernel_size: tuple[int, int] | int) -> tuple[int, int]:
+    """
+    Unpacks a 2D kernel size tuple or integer into two separate integers.
+
+    Args:
+    kernel_size (tuple[int, int] | int): Kernel size for convolution or padding.
+
+    Returns:
+    tuple[int, int]: A tuple of two integers representing the kernel size in the y and x dimensions.
+    """
     if isinstance(kernel_size, int):
         ky = kx = kernel_size
     else:
@@ -27,7 +49,18 @@ def _unpack_2d_ks(kernel_size: tuple[int, int] | int) -> tuple[int, int]:
 def gaussian(
     window_size: int, sigma: Tensor | float, *, device: Device | None = None, dtype: Dtype | None = None
 ) -> Tensor:
+    """
+    Computes the Gaussian kernel for a given window size and standard deviation.
 
+    Args:
+    window_size (int): The size of the window for the Gaussian kernel.
+    sigma (Tensor | float): The standard deviation for the Gaussian distribution.
+    device (Device | None, optional): The device on which to create the tensor. Defaults to None.
+    dtype (Dtype | None, optional): The data type for the tensor. Defaults to None.
+
+    Returns:
+    Tensor: A 1D tensor representing the Gaussian kernel.
+    """
     batch_size = sigma.shape[0]
 
     x = (torch.arange(window_size, device=sigma.device, dtype=sigma.dtype) - window_size // 2).expand(batch_size, -1)
@@ -48,7 +81,19 @@ def get_gaussian_kernel1d(
     device: Device | None = None,
     dtype: Dtype | None = None,
 ) -> Tensor:
+    """
+    Returns a 1D Gaussian kernel with a given kernel size and standard deviation.
 
+    Args:
+    kernel_size (int): The size of the Gaussian kernel.
+    sigma (float | Tensor): The standard deviation for the Gaussian distribution.
+    force_even (bool, optional): Whether to force the kernel size to be even. Defaults to False.
+    device (Device | None, optional): The device on which to create the tensor. Defaults to None.
+    dtype (Dtype | None, optional): The data type for the tensor. Defaults to None.
+
+    Returns:
+    Tensor: A 1D tensor representing the Gaussian kernel.
+    """
     return gaussian(kernel_size, sigma, device=device, dtype=dtype)
 
 
@@ -60,7 +105,19 @@ def get_gaussian_kernel2d(
     device: Device | None = None,
     dtype: Dtype | None = None,
 ) -> Tensor:
+    """
+    Returns a 2D Gaussian kernel with a given kernel size and standard deviation.
 
+    Args:
+    kernel_size (tuple[int, int] | int): The size of the Gaussian kernel as a tuple or integer.
+    sigma (tuple[float, float] | Tensor): The standard deviation for the Gaussian distribution as a tuple or tensor.
+    force_even (bool, optional): Whether to force the kernel size to be even. Defaults to False.
+    device (Device | None, optional): The device on which to create the tensor. Defaults to None.
+    dtype (Dtype | None, optional): The data type for the tensor. Defaults to None.
+
+    Returns:
+    Tensor: A 2D tensor representing the Gaussian kernel.
+    """
     sigma = torch.Tensor([[sigma, sigma]]).to(device=device, dtype=dtype)
 
     ksize_y, ksize_x = _unpack_2d_ks(kernel_size)
@@ -81,38 +138,22 @@ def _bilateral_blur(
     border_type: str = 'reflect',
     color_distance_type: str = 'l1',
 ) -> Tensor:
+    """
+    Performs bilateral blur on an input tensor with optional guidance.
 
-    if isinstance(sigma_color, Tensor):
-        sigma_color = sigma_color.to(device=input.device, dtype=input.dtype).view(-1, 1, 1, 1, 1)
+    Args:
+    input (Tensor): The input tensor to apply the bilateral blur.
+    guidance (Tensor | None, optional): The guidance tensor for the bilateral blur. Defaults to None.
+    kernel_size (tuple[int, int] | int): The size of the blur kernel.
+    sigma_color (float | Tensor): The standard deviation for color in the bilateral blur.
+    sigma_space (tuple[float, float] | Tensor): The standard deviation for space in the bilateral blur.
+    border_type (str, optional): The border type for padding. Defaults to 'reflect'.
+    color_distance_type (str, optional): The type of color distance to use. Defaults to 'l1'.
 
-    ky, kx = _unpack_2d_ks(kernel_size)
-    pad_y, pad_x = _compute_zero_padding(kernel_size)
-
-    padded_input = pad(input, (pad_x, pad_x, pad_y, pad_y), mode=border_type)
-    unfolded_input = padded_input.unfold(2, ky, 1).unfold(3, kx, 1).flatten(-2)  # (B, C, H, W, Ky x Kx)
-
-    if guidance is None:
-        guidance = input
-        unfolded_guidance = unfolded_input
-    else:
-        padded_guidance = pad(guidance, (pad_x, pad_x, pad_y, pad_y), mode=border_type)
-        unfolded_guidance = padded_guidance.unfold(2, ky, 1).unfold(3, kx, 1).flatten(-2)  # (B, C, H, W, Ky x Kx)
-
-    diff = unfolded_guidance - guidance.unsqueeze(-1)
-    if color_distance_type == "l1":
-        color_distance_sq = diff.abs().sum(1, keepdim=True).square()
-    elif color_distance_type == "l2":
-        color_distance_sq = diff.square().sum(1, keepdim=True)
-    else:
-        raise ValueError("color_distance_type only acceps l1 or l2")
-    color_kernel = (-0.5 / sigma_color**2 * color_distance_sq).exp()  # (B, 1, H, W, Ky x Kx)
-
-    space_kernel = get_gaussian_kernel2d(kernel_size, sigma_space, device=input.device, dtype=input.dtype)
-    space_kernel = space_kernel.view(-1, 1, 1, 1, kx * ky)
-
-    kernel = space_kernel * color_kernel
-    out = (unfolded_input * kernel).sum(-1) / kernel.sum(-1)
-    return out
+    Returns:
+    Tensor: The blurred output tensor.
+    """
+    pass
 
 
 def bilateral_blur(
@@ -123,22 +164,35 @@ def bilateral_blur(
     border_type: str = 'reflect',
     color_distance_type: str = 'l1',
 ) -> Tensor:
+    """
+    Applies bilateral blur to an input tensor.
+
+    Args:
+    input (Tensor): The input tensor to apply the bilateral blur.
+    kernel_size (tuple[int, int] | int, optional): The size of the blur kernel. Defaults to (13, 13).
+    sigma_color (float | Tensor, optional): The standard deviation for color in the bilateral blur. Defaults to 3.0.
+    sigma_space (tuple[float, float] | Tensor, optional): The standard deviation for space in the bilateral blur. Defaults to (3.0, 3.0).
+    border_type (str, optional): The border type for padding. Defaults to 'reflect'.
+    color_distance_type (str, optional): The type of color distance to use. Defaults to 'l1'.
+
+    Returns:
+    Tensor: The blurred output tensor.
+    """
     return _bilateral_blur(input, None, kernel_size, sigma_color, sigma_space, border_type, color_distance_type)
 
 
 def adaptive_anisotropic_filter(x, g=None):
-    if g is None:
-        g = x
-    s, m = torch.std_mean(g, dim=(1, 2, 3), keepdim=True)
-    s = s + 1e-5
-    guidance = (g - m) / s
-    y = _bilateral_blur(x, guidance,
-                        kernel_size=(13, 13),
-                        sigma_color=3.0,
-                        sigma_space=3.0,
-                        border_type='reflect',
-                        color_distance_type='l1')
-    return y
+    """
+    Applies adaptive anisotropic filtering to an input tensor.
+
+    Args:
+    x (Tensor): The input tensor to apply the filter.
+    g (Tensor | None, optional): The guidance tensor for the filter. Defaults to None.
+
+    Returns:
+    Tensor: The filtered output tensor.
+    """
+    pass
 
 
 def joint_bilateral_blur(
@@ -150,10 +204,28 @@ def joint_bilateral_blur(
     border_type: str = 'reflect',
     color_distance_type: str = 'l1',
 ) -> Tensor:
+    """
+    Applies joint bilateral blur to an input tensor with guidance.
+
+    Args:
+    input (Tensor): The input tensor to apply the bilateral blur.
+    guidance (Tensor): The guidance tensor for the bilateral blur.
+    kernel_size (tuple[int, int] | int): The size of the blur kernel.
+    sigma_color (float | Tensor): The standard deviation for color in the bilateral blur.
+    sigma_space (tuple[float, float] | Tensor): The standard deviation for space in the bilateral blur.
+    border_type (str, optional): The border type for padding. Defaults to 'reflect'.
+    color_distance_type (str, optional): The type of color distance to use. Defaults to 'l1'.
+
+    Returns:
+    Tensor: The blurred output tensor.
+    """
     return _bilateral_blur(input, guidance, kernel_size, sigma_color, sigma_space, border_type, color_distance_type)
 
 
 class _BilateralBlur(torch.nn.Module):
+    """
+    Base class for bilateral blur operations.
+    """
     def __init__(
         self,
         kernel_size: tuple[int, int] | int,
@@ -162,6 +234,16 @@ class _BilateralBlur(torch.nn.Module):
         border_type: str = 'reflect',
         color_distance_type: str = "l1",
     ) -> None:
+        """
+        Initializes the base class for bilateral blur operations.
+
+        Args:
+        kernel_size (tuple[int, int] | int): The size of the blur kernel.
+        sigma_color (float | Tensor): The standard deviation for color in the bilateral blur.
+        sigma_space (tuple[float, float] | Tensor): The standard deviation for space in the bilateral blur.
+        border_type (str, optional): The border type for padding. Defaults to 'reflect'.
+        color_distance_type (str, optional): The type of color distance to use. Defaults to 'l1'.
+        """
         super().__init__()
         self.kernel_size = kernel_size
         self.sigma_color = sigma_color
@@ -170,31 +252,16 @@ class _BilateralBlur(torch.nn.Module):
         self.color_distance_type = color_distance_type
 
     def __repr__(self) -> str:
+        """
+        Returns a string representation of the class.
+
+        Returns:
+        str: The string representation of the class.
+        """
         return (
             f"{self.__class__.__name__}"
             f"(kernel_size={self.kernel_size}, "
             f"sigma_color={self.sigma_color}, "
             f"sigma_space={self.sigma_space}, "
             f"border_type={self.border_type}, "
-            f"color_distance_type={self.color_distance_type})"
-        )
-
-
-class BilateralBlur(_BilateralBlur):
-    def forward(self, input: Tensor) -> Tensor:
-        return bilateral_blur(
-            input, self.kernel_size, self.sigma_color, self.sigma_space, self.border_type, self.color_distance_type
-        )
-
-
-class JointBilateralBlur(_BilateralBlur):
-    def forward(self, input: Tensor, guidance: Tensor) -> Tensor:
-        return joint_bilateral_blur(
-            input,
-            guidance,
-            self.kernel_size,
-            self.sigma_color,
-            self.sigma_space,
-            self.border_type,
-            self.color_distance_type,
-        )
+            f"color_distance_
