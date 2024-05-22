@@ -1,1 +1,15 @@
-*       @lllyasviel
+# This is a Python script that performs some data analysis on a dataset of sales data.
+
+import pandas as pd  # Importing the pandas library to work with dataframes
+
+# Load the sales data from a CSV file into a pandas dataframe
+sales_data = pd.read_csv("sales_data.csv")
+
+# Calculate the total sales for each product and store the result in a new dataframe column
+sales_data["total_sales"] = sales_data["price"] * sales_data["quantity"]
+
+# Group the data by product and calculate the average total sales
+average_sales = sales_data.groupby("product")["total_sales"].mean()
+
+# Print the average sales for each product
+print(average_sales)
