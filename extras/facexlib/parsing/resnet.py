@@ -4,6 +4,8 @@ import torch.nn.functional as F
 
 def conv3x3(in_planes, out_planes, stride=1):
     """3x3 convolution with padding"""
+    # Returns a 3x3 convolutional layer with the specified input and output channels,
+    # stride, and bias. Padding is set to 1.
     return nn.Conv2d(in_planes, out_planes, kernel_size=3, stride=stride, padding=1, bias=False)
 
 
@@ -17,6 +19,9 @@ class BasicBlock(nn.Module):
         self.bn2 = nn.BatchNorm2d(out_chan)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = None
+        
+        # Initialization for downsample is performed here if the input and output
+        # channels are not equal or if the stride is not 1.
         if in_chan != out_chan or stride != 1:
             self.downsample = nn.Sequential(
                 nn.Conv2d(in_chan, out_chan, kernel_size=1, stride=stride, bias=False),
