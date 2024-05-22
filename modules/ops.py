@@ -1,19 +1,25 @@
-import torch
-import contextlib
+import torch.nn as nn
 
+class MyModel(nn.Module):
+    def __init__(self):
+        super(MyModel, self).__init__()
+        self.linear = nn.Linear(10, 10)
+    
+    def forward(self, x):
+        x = self.linear(x)
+        return x
 
-@contextlib.contextmanager
-def use_patched_ops(operations):
-    op_names = ['Linear', 'Conv2d', 'Conv3d', 'GroupNorm', 'LayerNorm']
-    backups = {op_name: getattr(torch.nn, op_name) for op_name in op_names}
+# Create a custom Linear operation
+class CustomLinear(nn.Linear):
+    def forward(self, x):
+        # Apply some custom transformation to the input
+        x = super().forward(x)
+        return x * 2
 
-    try:
-        for op_name in op_names:
-            setattr(torch.nn, op_name, getattr(operations, op_name))
+# Create a model using the custom Linear operation
+model = MyModel()
 
-        yield
-
-    finally:
-        for op_name in op_names:
-            setattr(torch.nn, op_name, backups[op_name])
-    return
+# Patch the Linear operation with the custom implementation
+with use_patched_ops(CustomLinear):
+    # The model will now use the custom Linear operation
+    y = model(x)
