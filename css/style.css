@@ -1,220 +1,315 @@
-/* based on https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/v1.6.0/style.css */
+/* The #context-menu ID selector targets the context menu element */
+#context-menu {
+    /* The z-index property positions the context menu above other elements */
+    z-index: 9999;
 
-#context-menu{
-    z-index:9999;
-    position:absolute;
-    display:block;
-    padding:0px 0;
-    border:2px solid #a55000;
-    border-radius:8px;
-    box-shadow:1px 1px 2px #CE6400;
+    /* The position property sets the type of positioning for the context menu */
+    position: absolute;
+
+    /* The display property sets the context menu to be displayed as a block-level element */
+    display: block;
+
+    /* The padding property sets the space around the content of the context menu */
+    padding: 0px 0;
+
+    /* The border property sets the border around the context menu */
+    border: 2px solid #a55000;
+
+    /* The border-radius property rounds the corners of the context menu */
+    border-radius: 8px;
+
+    /* The box-shadow property adds a shadow to the context menu */
+    box-shadow: 1px 1px 2px #CE6400;
+
+    /* The width property sets the width of the context menu */
     width: 200px;
 }
 
-.context-menu-items{
+/* The .context-menu-items class selector targets the list of context menu items */
+.context-menu-items {
+    /* The list-style property removes the bullet points from the list */
     list-style: none;
+
+    /* The margin and padding properties remove any extra space around the list */
     margin: 0;
     padding: 0;
 }
 
-.context-menu-items a{
-    display:block;
-    padding:5px;
-    cursor:pointer;
+/* The .context-menu-items a selector targets the hyperlinks within the context menu items */
+.context-menu-items a {
+    /* The display property sets the hyperlinks to be displayed as block-level elements */
+    display: block;
+
+    /* The padding property adds space around the hyperlinks */
+    padding: 5px;
+
+    /* The cursor property sets the pointer to a hand when hovering over the hyperlinks */
+    cursor: pointer;
 }
 
-.context-menu-items a:hover{
+/* The .context-menu-items a:hover selector targets the hyperlinks when hovered */
+.context-menu-items a:hover {
+    /* The background property changes the background color of the hyperlinks when hovered */
     background: #a55000;
 }
 
+/* The .canvas-tooltip-info class selector targets the tooltip info element */
 .canvas-tooltip-info {
-  position: absolute;
-  top: 28px;
-  left: 2px;
-  cursor: help;
-  background-color: rgba(0, 0, 0, 0.3);
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
+    /* The position property sets the type of positioning for the tooltip info element */
+    position: absolute;
 
-  z-index: 100;
+    /* The top and left properties position the tooltip info element relative to its parent element */
+    top: 28px;
+    left: 2px;
+
+    /* The cursor property sets the pointer to a help icon when hovering over the tooltip info element */
+    cursor: help;
+
+    /* The background-color property sets the background color of the tooltip info element */
+    background-color: rgba(0, 0, 0, 0.3);
+
+    /* The width and height properties set the size of the tooltip info element */
+    width: 20px;
+    height: 20px;
+
+    /* The border-radius property rounds the corners of the tooltip info element */
+    border-radius: 50%;
+
+    /* The display property sets the tooltip info element to be displayed as a flex container */
+    display: flex;
+
+    /* The align-items and justify-content properties center the content within the tooltip info element */
+    align-items: center;
+    justify-content: center;
+
+    /* The flex-direction property sets the direction of the flex items within the tooltip info element */
+    flex-direction: column;
+
+    /* The z-index property positions the tooltip info element above other elements */
+    z-index: 100;
 }
 
+/* The .canvas-tooltip-info::after pseudo-element targets the tooltip info element's arrow */
 .canvas-tooltip-info::after {
-  content: '';
-  display: block;
-  width: 2px;
-  height: 7px;
-  background-color: white;
-  margin-top: 2px;
+    /* The content property sets the content of the pseudo-element */
+    content: '';
+
+    /* The display property sets the pseudo-element to be displayed as a block-level element */
+    display: block;
+
+    /* The width and height properties set the size of the pseudo-element */
+    width: 2px;
+    height: 7px;
+
+    /* The background-color property sets the background color of the pseudo-element */
+    background-color: white;
+
+    /* The margin-top property adds space above the pseudo-element */
+    margin-top: 2px;
 }
 
+/* The .canvas-tooltip-info::before pseudo-element targets the tooltip info element's dot */
 .canvas-tooltip-info::before {
-  content: '';
-  display: block;
-  width: 2px;
-  height: 2px;
-  background-color: white;
+    /* The content property sets the content of the pseudo-element */
+    content: '';
+
+    /* The display property sets the pseudo-element to be displayed as a block-level element */
+    display: block;
+
+    /* The width and height properties set the size of the pseudo-element */
+    width: 2px;
+    height: 2px;
+
+    /* The background-color property sets the background color of the pseudo-element */
+    background-color: white;
 }
 
+/* The .canvas-tooltip-content class selector targets the tooltip content element */
 .canvas-tooltip-content {
-  display: none;
-  background-color: #f9f9f9;
-  color: #333;
-  border: 1px solid #ddd;
-  padding: 15px;
-  position: absolute;
-  top: 40px;
-  left: 10px;
-  width: 250px;
-  font-size: 16px;
-  opacity: 0;
-  border-radius: 8px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-
-  z-index: 100;
-}
-
-.canvas-tooltip:hover .canvas-tooltip-content {
-  display: block;
-  animation: fadeIn 0.5s;
-  opacity: 1;
-}
-
-@keyframes fadeIn {
-  from {opacity: 0;}
-  to {opacity: 1;}
-}
-
-.styler {
-  overflow:inherit !important;
-}
-
-.gradio-container{
-  overflow: visible;
-}
-
-/* fullpage image viewer */
-
-#lightboxModal{
+    /* The display property sets the tooltip content element to be hidden by default */
     display: none;
+
+    /* The background-color property sets the background color of the tooltip content element */
+    background-color: #f9f9f9;
+
+    /* The color property sets the text color of the tooltip content element */
+    color: #333;
+
+    /* The border property sets the border around the tooltip content element */
+    border: 1px solid #ddd;
+
+    /* The padding property adds space around the content of the tooltip content element */
+    padding: 15px;
+
+    /* The position property sets the type of positioning for the tooltip content element */
+    position: absolute;
+
+    /* The top and left properties position the tooltip content element relative to its parent element */
+    top: 40px;
+    left: 10px;
+
+    /* The width property sets the width of the tooltip content element */
+    width: 250px;
+
+    /* The font-size property sets the font size of the tooltip content element */
+    font-size: 16px;
+
+    /* The opacity property sets the opacity of the tooltip content element */
+    opacity: 0;
+
+    /* The border-radius property rounds the corners of the tooltip content element */
+    border-radius: 8px;
+
+    /* The box-shadow property adds a shadow to the tooltip content element */
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+
+    /* The z-index property positions the tooltip content element above other elements */
+    z-index: 100;
+}
+
+/* The .canvas-tooltip:hover .canvas-tooltip-content selector targets the tooltip content element when hovered */
+.canvas-tooltip:hover .canvas-tooltip-content {
+    /* The display property sets the tooltip content element to be displayed when hovered */
+    display: block;
+
+    /* The animation property adds a fade-in animation to the tooltip content element when hovered */
+    animation: fadeIn 0.5s;
+
+    /* The opacity property sets the opacity of the tooltip content element when hovered */
+    opacity: 1;
+}
+
+/* The @keyframes rule defines the fade-in animation for the tooltip content element */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* The .styler class selector targets the styler element */
+.styler {
+    /* The overflow property sets the overflow behavior for the styler element */
+    overflow: inherit !important;
+}
+
+/* The .gradio-container class selector targets the gradio container element */
+.gradio-container {
+    /* The overflow property sets the overflow behavior for the gradio container element */
+    overflow: visible;
+}
+
+/* The fullpage image viewer styles */
+
+/* The #lightboxModal ID selector targets the lightbox modal element */
+#lightboxModal {
+    /* The display property sets the lightbox modal element to be hidden by default */
+    display: none;
+
+    /* The position property sets the type of positioning for the lightbox modal element */
     position: fixed;
+
+    /* The z-index property positions the lightbox modal element above other elements */
     z-index: 1001;
+
+    /* The left and top properties position the lightbox modal element relative to the viewport */
     left: 0;
     top: 0;
+
+    /* The width and height properties set the size of the lightbox modal element */
     width: 100%;
     height: 100%;
+
+    /* The overflow property sets the overflow behavior for the lightbox modal element */
     overflow: auto;
+
+    /* The background-color property sets the background color of the lightbox modal element */
     background-color: rgba(20, 20, 20, 0.95);
+
+    /* The user-select property prevents the selection of text within the lightbox modal element */
     user-select: none;
+
+    /* The -webkit-user-select property prevents the selection of text within the lightbox modal element on WebKit-based browsers */
     -webkit-user-select: none;
+
+    /* The flex-direction property sets the direction of the flex items within the lightbox modal element */
     flex-direction: column;
 }
 
+/* The .modalControls class selector targets the modal controls element */
 .modalControls {
+    /* The display property sets the modal controls element to be displayed as a flex container */
     display: flex;
+
+    /* The position property sets the type of positioning for the modal controls element */
     position: absolute;
+
+    /* The right and left properties position the modal controls element relative to the lightbox modal element */
     right: 0px;
     left: 0px;
+
+    /* The gap property sets the space between the modal controls elements */
     gap: 1em;
+
+    /* The padding property adds space around the content of the modal controls element */
     padding: 1em;
-    background-color:rgba(0,0,0,0);
+
+    /* The background-color property sets the background color of the modal controls element */
+    background-color: rgba(0,0,0,0);
+
+    /* The z-index property positions the modal controls element above other elements */
     z-index: 1;
+
+    /* The transition property adds a transition effect to the background color of the modal controls element */
     transition: 0.2s ease background-color;
 }
+
+/* The .modalControls:hover pseudo-class selector targets the modal controls element when hovered */
 .modalControls:hover {
-    background-color:rgba(0,0,0,0.9);
+    /* The background-color property changes the background color of the modal controls element when hovered */
+    background-color: rgba(0,0,0,0.9);
 }
+
+/* The .modalClose class selector targets the close button element */
 .modalClose {
+    /* The margin-left property adds space to the left of the close button element */
     margin-left: auto;
 }
-.modalControls span{
+
+/* The .modalControls span selector targets the span elements within the modal controls element */
+.modalControls span {
+    /* The color property sets the text color of the span elements */
     color: white;
+
+    /* The text-shadow property adds a shadow to the text of the span elements */
     text-shadow: 0px 0px 0.25em black;
+
+    /* The font-size property sets the font size of the span elements */
     font-size: 35px;
+
+    /* The font-weight property sets the font weight of the span elements */
     font-weight: bold;
+
+    /* The cursor property sets the pointer to a hand when hovering over the span elements */
     cursor: pointer;
+
+    /* The width property sets the width of the span elements */
     width: 1em;
 }
 
-.modalControls span:hover, .modalControls span:focus{
+/* The .modalControls span:hover and .modalControls span:focus pseudo-class selectors target the span elements when hovered or focused */
+.modalControls span:hover,
+.modalControls span:focus {
+    /* The color property changes the text color of the span elements when hovered or focused */
     color: #999;
+
+    /* The text-decoration property removes any underline from the span elements when hovered or focused */
     text-decoration: none;
 }
 
+/* The #lightboxModal > img selector targets the img elements within the lightbox modal element */
 #lightboxModal > img {
-    display: block;
-    margin: auto;
-    width: auto;
-}
-
-#lightboxModal > img.modalImageFullscreen{
-    object-fit: contain;
-    height: 100%;
-    width: 100%;
-    min-height: 0;
-}
-
-.modalPrev,
-.modalNext {
-  cursor: pointer;
-  position: absolute;
-  top: 50%;
-  width: auto;
-  padding: 16px;
-  margin-top: -50px;
-  color: white;
-  font-weight: bold;
-  font-size: 20px;
-  transition: 0.6s ease;
-  border-radius: 0 3px 3px 0;
-  user-select: none;
-  -webkit-user-select: none;
-}
-
-.modalNext {
-  right: 0;
-  border-radius: 3px 0 0 3px;
-}
-
-.modalPrev:hover,
-.modalNext:hover {
-  background-color: rgba(0, 0, 0, 0.8);
-}
-
-#imageARPreview {
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    border: 2px solid red;
-    background: rgba(255, 0, 0, 0.3);
-    z-index: 900;
-    pointer-events: none;
-    display: none;
-}
-
-#stylePreviewOverlay {
-    opacity: 0;
-    pointer-events: none;
-    width: 128px;
-    height: 128px;
-    position: fixed;
-    top: 0px;
-    left: 0px;
-    border: solid 1px lightgrey;
-    transform: translate(-140px, 20px);
-    background-size: cover;
-    background-position: center;
-    background-color: rgba(0, 0, 0, 0.3);
-    border-radius: 5px;
-    z-index: 100;
-    transition: transform 0.1s ease, opacity 0.3s ease;
-}
-
-#stylePreviewOverlay.lower-half {
-    transform: translate(-140px, -140px);
-}
+   
