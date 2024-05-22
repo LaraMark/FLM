@@ -16,6 +16,7 @@ from .diffusionmodules.openaimodel import ResBlock, timestep_embedding
 from .attention import BasicTransformerBlock
 
 def partialclass(cls, *args, **kwargs):
+    """Create a partial class with the given arguments and keyword arguments."""
     class NewCls(cls):
         __init__ = functools.partialmethod(cls.__init__, *args, **kwargs)
 
@@ -23,16 +24,29 @@ def partialclass(cls, *args, **kwargs):
 
 
 class VideoResBlock(ResnetBlock):
+    """A variant of ResnetBlock that includes a time-based stack of ResBlocks."""
     def __init__(
-        self,
-        out_channels,
-        *args,
-        dropout=0.0,
-        video_kernel_size=3,
-        alpha=0.0,
-        merge_strategy="learned",
-        **kwargs,
+            self,
+            out_channels,
+            *args,
+            dropout=0.0,
+            video_kernel_size=3,
+            alpha=0.0,
+            merge_strategy="learned",
+            **kwargs,
     ):
+        """
+        Initialize the VideoResBlock.
+
+        Args:
+            out_channels (int): The number of output channels.
+            *args: Variable length argument list.
+            dropout (float, optional): The dropout rate. Defaults to 0.0.
+            video_kernel_size (int or list, optional): The kernel size for the time-based stack of ResBlocks. Defaults to 3.
+            alpha (float, optional): The alpha value for the merge strategy. Defaults to 0.0.
+            merge_strategy (str, optional): The merge strategy for the time-based stack of ResBlocks. Defaults to "learned".
+            **kwargs: Arbitrary keyword arguments.
+        """
         super().__init__(out_channels=out_channels, dropout=dropout, *args, **kwargs)
         if video_kernel_size is None:
             video_kernel_size = [3, 1, 1]
@@ -61,6 +75,15 @@ class VideoResBlock(ResnetBlock):
             raise ValueError(f"unknown merge strategy {self.merge_strategy}")
 
     def get_alpha(self, bs):
+        """
+        Get the alpha value for the merge strategy.
+
+        Args:
+            bs (int): The batch size.
+
+        Returns:
+            torch.Tensor: The alpha value.
+        """
         if self.merge_strategy == "fixed":
             return self.mix_factor
         elif self.merge_strategy == "learned":
@@ -69,6 +92,18 @@ class VideoResBlock(ResnetBlock):
             raise NotImplementedError()
 
     def forward(self, x, temb, skip_video=False, timesteps=None):
+        """
+        Forward pass of the VideoResBlock.
+
+        Args:
+            x (torch.Tensor): The input tensor.
+            temb (torch.Tensor): The timestep embedding tensor.
+            skip_video (bool, optional): Whether to skip the video processing. Defaults to False.
+            timesteps (int, optional): The number of timesteps. Defaults to None.
+
+        Returns:
+            torch.Tensor: The output tensor.
+        """
         b, c, h, w = x.shape
         if timesteps is None:
             timesteps = b
@@ -90,7 +125,18 @@ class VideoResBlock(ResnetBlock):
 
 
 class AE3DConv(ops.Conv2d):
+    """A 3D convolution wrapper for 2D convolutions."""
     def __init__(self, in_channels, out_channels, video_kernel_size=3, *args, **kwargs):
+        """
+        Initialize the AE3DConv.
+
+        Args:
+            in_channels (int): The number of input channels.
+            out_channels (int): The number of output channels.
+            video_kernel_size (int or list, optional): The kernel size for the 3D convolution. Defaults to 3.
+            *args: Variable length argument list.
+            **kwargs: Arbitrary keyword arguments.
+        """
         super().__init__(in_channels, out_channels, *args, **kwargs)
         if isinstance(video_kernel_size, Iterable):
             padding = [int(k // 2) for k in video_kernel_size]
@@ -105,6 +151,17 @@ class AE3DConv(ops.Conv2d):
         )
 
     def forward(self, input, timesteps=None, skip_video=False):
+        """
+        Forward pass of the AE3DConv.
+
+        Args:
+            input (torch.Tensor): The input tensor.
+            timesteps (int, optional): The number of timesteps. Defaults to None.
+            skip_video (bool, optional): Whether to skip the video processing. Defaults to False.
+
+        Returns:
+            torch.Tensor: The output tensor.
+        """
         if timesteps is None:
             timesteps = input.shape[0]
         x = super().forward(input)
@@ -116,9 +173,18 @@ class AE3DConv(ops.Conv2d):
 
 
 class AttnVideoBlock(AttnBlock):
+    """A variant of AttnBlock that includes a time-based attention block."""
     def __init__(
-        self, in_channels: int, alpha: float = 0, merge_strategy: str = "learned"
+            self, in_channels: int, alpha: float = 0, merge_strategy: str = "learned"
     ):
+        """
+        Initialize the AttnVideoBlock.
+
+        Args:
+            in_channels (int): The number of input channels.
+            alpha (float, optional): The alpha value for the merge strategy. Defaults to 0.
+            merge_strategy (str, optional): The merge strategy for the time-based attention block. Defaults to "learned".
+        """
         super().__init__(in_channels)
         # no context, single headed, as in base class
         self.time_mix_block = BasicTransformerBlock(
@@ -147,6 +213,17 @@ class AttnVideoBlock(AttnBlock):
             raise ValueError(f"unknown merge strategy {self.merge_strategy}")
 
     def forward(self, x, timesteps=None, skip_time_block=False):
+        """
+        Forward pass of the AttnVideoBlock.
+
+        Args:
+            x (torch.Tensor): The input tensor.
+            timesteps (int, optional): The number of timesteps. Defaults to None.
+            skip_time_block (bool, optional): Whether to skip the time-based attention block. Defaults to False.
+
+        Returns:
+            torch.Tensor: The output tensor.
+        """
         if skip_time_block:
             return super().forward(x)
 
@@ -177,8 +254,14 @@ class AttnVideoBlock(AttnBlock):
         return x_in + x
 
     def get_alpha(
-        self,
+            self,
     ):
+        """
+        Get the alpha value for the merge strategy.
+
+        Returns:
+            torch.Tensor: The alpha value.
+        """
         if self.merge_strategy == "fixed":
             return self.mix_factor
         elif self.merge_strategy == "learned":
@@ -189,57 +272,70 @@ class AttnVideoBlock(AttnBlock):
 
 
 def make_time_attn(
-    in_channels,
-    attn_type="vanilla",
-    attn_kwargs=None,
-    alpha: float = 0,
-    merge_strategy: str = "learned",
+        in_channels,
+        attn_type="vanilla",
+        attn_kwargs=None,
+        alpha: float = 0,
+        merge_strategy: str = "learned",
 ):
+    """
+    Create a time-based attention block.
+
+    Args:
+        in_channels (int): The number of input channels.
+        attn_type (str, optional): The type of attention block. Defaults to "vanilla".
+        attn_kwargs (dict, optional): The keyword arguments for the attention block. Defaults to None.
+        alpha (float, optional): The alpha value for the merge strategy. Defaults to 0.
+        merge_strategy (str, optional): The merge strategy for the time-based attention block. Defaults to "learned".
+
+    Returns:
+        Callable: The time-based attention block.
+    """
     return partialclass(
         AttnVideoBlock, in_channels, alpha=alpha, merge_strategy=merge_strategy
     )
 
 
 class Conv2DWrapper(torch.nn.Conv2d):
+    """A wrapper for 2D convolutions with a custom forward method."""
     def forward(self, input: torch.Tensor, **kwargs) -> torch.Tensor:
+        """
+        Forward pass of the Conv2DWrapper.
+
+        Args:
+            input (torch.Tensor): The input tensor.
+
+        Returns:
+            torch.Tensor: The output tensor.
+        """
         return super().forward(input)
 
 
 class VideoDecoder(Decoder):
+    """A variant of Decoder that includes time-based processing."""
     available_time_modes = ["all", "conv-only", "attn-only"]
 
     def __init__(
-        self,
-        *args,
-        video_kernel_size: Union[int, list] = 3,
-        alpha: float = 0.0,
-        merge_strategy: str = "learned",
-        time_mode: str = "conv-only",
-        **kwargs,
+            self,
+            *args,
+            video_kernel_size: Union[int, list] = 3,
+            alpha: float = 0.0,
+            merge_strategy: str = "learned",
+            time_mode: str = "conv-only",
+            **kwargs,
     ):
+        """
+        Initialize the VideoDecoder.
+
+        Args:
+            *args: Variable length argument list.
+            video_kernel_size (int or list, optional): The kernel size for the time-based convolutions. Defaults to 3.
+            alpha (float, optional): The alpha value for the merge strategy. Defaults to 0.0.
+            merge_strategy (str, optional): The merge strategy for the time-based processing. Defaults to "learned".
+            time_mode (str, optional): The time mode for the decoder. Defaults to "conv-only".
+            **kwargs: Arbitrary keyword arguments.
+        """
         self.video_kernel_size = video_kernel_size
         self.alpha = alpha
         self.merge_strategy = merge_strategy
-        self.time_mode = time_mode
-        assert (
-            self.time_mode in self.available_time_modes
-        ), f"time_mode parameter has to be in {self.available_time_modes}"
-
-        if self.time_mode != "attn-only":
-            kwargs["conv_out_op"] = partialclass(AE3DConv, video_kernel_size=self.video_kernel_size)
-        if self.time_mode not in ["conv-only", "only-last-conv"]:
-            kwargs["attn_op"] = partialclass(make_time_attn, alpha=self.alpha, merge_strategy=self.merge_strategy)
-        if self.time_mode not in ["attn-only", "only-last-conv"]:
-            kwargs["resnet_op"] = partialclass(VideoResBlock, video_kernel_size=self.video_kernel_size, alpha=self.alpha, merge_strategy=self.merge_strategy)
-
-        super().__init__(*args, **kwargs)
-
-    def get_last_layer(self, skip_time_mix=False, **kwargs):
-        if self.time_mode == "attn-only":
-            raise NotImplementedError("TODO")
-        else:
-            return (
-                self.conv_out.time_mix_conv.weight
-                if not skip_time_mix
-                else self.conv_out.weight
-            )
+        self.
