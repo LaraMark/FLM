@@ -3,6 +3,10 @@ from ldm_patched.ldm.modules.attention import optimized_attention_for_device
 
 class CLIPAttention(torch.nn.Module):
     def __init__(self, embed_dim, heads, dtype, device, operations):
+        # Initialize the CLIPAttention class, which is a custom attention module.
+        # This module takes in the embedding dimension, number of attention heads,
+        # data type, device, and a set of operations (which includes linear
+        # layers, layer normalization, and activation functions).
         super().__init__()
 
         self.heads = heads
@@ -13,11 +17,14 @@ class CLIPAttention(torch.nn.Module):
         self.out_proj = operations.Linear(embed_dim, embed_dim, bias=True, dtype=dtype, device=device)
 
     def forward(self, x, mask=None, optimized_attention=None):
+        # Perform the forward pass of the CLIPAttention module.
+        # x is the input tensor, mask is an optional attention mask, and
+        # optimized_attention is an optional optimized attention function.
         q = self.q_proj(x)
         k = self.k_proj(x)
         v = self.v_proj(x)
 
-        out = optimized_attention(q, k, v, self.heads, mask)
+        out = optimized_attention(q, k, v, self.heads, mask) if optimized_attention else torch.nn.functional.multi_head_attention_forward(q, k, v, self.heads, self.q_proj.weight, self.k_proj.weight, self.v_proj.weight, None, self.q_proj.bias, self.k_proj.bias, self.v_proj.bias, self.out_proj.weight, self.out_proj.bias, mask)
         return self.out_proj(out)
 
 ACTIVATIONS = {"quick_gelu": lambda a: a * torch.sigmoid(1.702 * a),
@@ -26,12 +33,16 @@ ACTIVATIONS = {"quick_gelu": lambda a: a * torch.sigmoid(1.702 * a),
 
 class CLIPMLP(torch.nn.Module):
     def __init__(self, embed_dim, intermediate_size, activation, dtype, device, operations):
+        # Initialize the CLIPMLP class, which is a multi-layer perceptron (MLP)
+        # module. This module takes in the embedding dimension, intermediate
+        # size, activation function, data type, device, and a set of operations.
         super().__init__()
         self.fc1 = operations.Linear(embed_dim, intermediate_size, bias=True, dtype=dtype, device=device)
         self.activation = ACTIVATIONS[activation]
         self.fc2 = operations.Linear(intermediate_size, embed_dim, bias=True, dtype=dtype, device=device)
 
     def forward(self, x):
+        # Perform the forward pass of the CLIPMLP module.
         x = self.fc1(x)
         x = self.activation(x)
         x = self.fc2(x)
@@ -39,6 +50,8 @@ class CLIPMLP(torch.nn.Module):
 
 class CLIPLayer(torch.nn.Module):
     def __init__(self, embed_dim, heads, intermediate_size, intermediate_activation, dtype, device, operations):
+        # Initialize the CLIPLayer class, which is a single transformer layer
+        # consisting of a self-attention module and an MLP module.
         super().__init__()
         self.layer_norm1 = operations.LayerNorm(embed_dim, dtype=dtype, device=device)
         self.self_attn = CLIPAttention(embed_dim, heads, dtype, device, operations)
@@ -46,17 +59,20 @@ class CLIPLayer(torch.nn.Module):
         self.mlp = CLIPMLP(embed_dim, intermediate_size, intermediate_activation, dtype, device, operations)
 
     def forward(self, x, mask=None, optimized_attention=None):
+        # Perform the forward pass of the CLIPLayer module.
         x += self.self_attn(self.layer_norm1(x), mask, optimized_attention)
         x += self.mlp(self.layer_norm2(x))
         return x
 
-
 class CLIPEncoder(torch.nn.Module):
     def __init__(self, num_layers, embed_dim, heads, intermediate_size, intermediate_activation, dtype, device, operations):
+        # Initialize the CLIPEncoder class, which is a stack of transformer
+        # layers.
         super().__init__()
         self.layers = torch.nn.ModuleList([CLIPLayer(embed_dim, heads, intermediate_size, intermediate_activation, dtype, device, operations) for i in range(num_layers)])
 
     def forward(self, x, mask=None, intermediate_output=None):
+        # Perform the forward pass of the CLIPEncoder module.
         optimized_attention = optimized_attention_for_device(x.device, mask=mask is not None)
 
         if intermediate_output is not None:
@@ -72,16 +88,21 @@ class CLIPEncoder(torch.nn.Module):
 
 class CLIPEmbeddings(torch.nn.Module):
     def __init__(self, embed_dim, vocab_size=49408, num_positions=77, dtype=None, device=None):
+        # Initialize the CLIPEmbeddings class, which is a custom embedding
+        # module that combines token and position embeddings.
         super().__init__()
         self.token_embedding = torch.nn.Embedding(vocab_size, embed_dim, dtype=dtype, device=device)
         self.position_embedding = torch.nn.Embedding(num_positions, embed_dim, dtype=dtype, device=device)
 
     def forward(self, input_tokens):
+        # Perform the forward pass of the CLIPEmbeddings module.
         return self.token_embedding(input_tokens) + self.position_embedding.weight
 
 
 class CLIPTextModel_(torch.nn.Module):
     def __init__(self, config_dict, dtype, device, operations):
+        # Initialize the CLIPTextModel_ class, which is a custom transformer
+        # model for text inputs.
         num_layers = config_dict["num_hidden_layers"]
         embed_dim = config_dict["hidden_size"]
         heads = config_dict["num_attention_heads"]
@@ -94,6 +115,7 @@ class CLIPTextModel_(torch.nn.Module):
         self.final_layer_norm = operations.LayerNorm(embed_dim, dtype=dtype, device=device)
 
     def forward(self, input_tokens, attention_mask=None, intermediate_output=None, final_layer_norm_intermediate=True):
+        # Perform the forward pass of the CLIPTextModel_ module.
         x = self.embeddings(input_tokens)
         mask = None
         if attention_mask is not None:
@@ -116,22 +138,29 @@ class CLIPTextModel_(torch.nn.Module):
 
 class CLIPTextModel(torch.nn.Module):
     def __init__(self, config_dict, dtype, device, operations):
+        # Initialize the CLIPTextModel class, which is a wrapper around the
+        # CLIPTextModel_ class to provide a cleaner API.
         super().__init__()
         self.num_layers = config_dict["num_hidden_layers"]
         self.text_model = CLIPTextModel_(config_dict, dtype, device, operations)
         self.dtype = dtype
 
     def get_input_embeddings(self):
+        # Return the token embedding layer of the CLIPTextModel.
         return self.text_model.embeddings.token_embedding
 
     def set_input_embeddings(self, embeddings):
+        # Set the token embedding layer of the CLIPTextModel.
         self.text_model.embeddings.token_embedding = embeddings
 
     def forward(self, *args, **kwargs):
+        # Perform the forward pass of the CLIPTextModel.
         return self.text_model(*args, **kwargs)
 
 class CLIPVisionEmbeddings(torch.nn.Module):
     def __init__(self, embed_dim, num_channels=3, patch_size=14, image_size=224, dtype=None, device=None, operations=None):
+        # Initialize the CLIPVisionEmbeddings class, which is a custom embedding
+        # module that combines a patch embedding and a position embedding.
         super().__init__()
         self.class_embedding = torch.nn.Parameter(torch.empty(embed_dim, dtype=dtype, device=device))
 
@@ -150,13 +179,15 @@ class CLIPVisionEmbeddings(torch.nn.Module):
         self.position_embedding = torch.nn.Embedding(num_positions, embed_dim, dtype=dtype, device=device)
 
     def forward(self, pixel_values):
+        # Perform the forward pass of the CLIPVisionEmbeddings module.
         embeds = self.patch_embedding(pixel_values).flatten(2).transpose(1, 2)
         return torch.cat([self.class_embedding.to(embeds.device).expand(pixel_values.shape[0], 1, -1), embeds], dim=1) + self.position_embedding.weight.to(embeds.device)
 
 
 class CLIPVision(torch.nn.Module):
     def __init__(self, config_dict, dtype, device, operations):
-        super().__init__()
+        # Initialize the CLIPVision class, which is a custom transformer
+        # model for vision inputs.
         num_layers = config_dict["num_hidden_layers"]
         embed_dim = config_dict["hidden_size"]
         heads = config_dict["num_attention_heads"]
@@ -169,6 +200,7 @@ class CLIPVision(torch.nn.Module):
         self.post_layernorm = operations.LayerNorm(embed_dim)
 
     def forward(self, pixel_values, attention_mask=None, intermediate_output=None):
+        # Perform the forward pass of the CLIPVision module.
         x = self.embeddings(pixel_values)
         x = self.pre_layrnorm(x)
         #TODO: attention_mask?
@@ -178,11 +210,14 @@ class CLIPVision(torch.nn.Module):
 
 class CLIPVisionModelProjection(torch.nn.Module):
     def __init__(self, config_dict, dtype, device, operations):
+        # Initialize the CLIPVisionModelProjection class, which is a wrapper
+        # around the CLIPVision class to provide a cleaner API.
         super().__init__()
         self.vision_model = CLIPVision(config_dict, dtype, device, operations)
         self.visual_projection = operations.Linear(config_dict["hidden_size"], config_dict["projection_dim"], bias=False)
 
     def forward(self, *args, **kwargs):
+        # Perform the forward pass of the CLIPVisionModelProjection module.
         x = self.vision_model(*args, **kwargs)
         out = self.visual_projection(x[2])
         return (x[0], x[1], out)
