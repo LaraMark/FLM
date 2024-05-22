@@ -1,5 +1,18 @@
+# Configuration settings for the project
+
+# This setting, 'blank_issues_enabled', controls whether users can create
+# blank issues in the project. Currently, it is set to false, which means
+# users cannot create blank issues.
 blank_issues_enabled: false
-contact_links:
+
+# This section, 'contact_links', contains a list of contact links for the
+# project. These links provide various ways for users to get in touch with
+# the project maintainers or community.
+contact_links: 
+  # Each contact link is represented as a dictionary with two keys:
+  # - 'name': the name of the link (e.g., 'Ask a question')
+  # - 'url': the URL to visit when the link is clicked (e.g., a discussion
+  #   forum for asking questions)
   - name: Ask a question
     url: https://github.com/lllyasviel/Fooocus/discussions/new?category=q-a
     about: Ask the community for help
