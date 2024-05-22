@@ -1,18 +1,23 @@
+// Regular expression to match decimal numbers
 var re_num = /^[.\d]+$/;
 
+// Objects to store original and translated lines
 var original_lines = {};
 var translated_lines = {};
 
+// Function to check if localization is available
 function hasLocalization() {
     return window.localization && Object.keys(window.localization).length > 0;
 }
 
+// Function to get text nodes under an element
 function textNodesUnder(el) {
     var n, a = [], walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT, null, false);
     while ((n = walk.nextNode())) a.push(n);
     return a;
 }
 
+// Function to check if a node can be translated
 function canBeTranslated(node, text) {
     if (!text) return false;
     if (!node.parentElement) return false;
@@ -22,6 +27,7 @@ function canBeTranslated(node, text) {
     return true;
 }
 
+// Function to get the translated text for a given text
 function getTranslation(text) {
     if (!text) return undefined;
 
@@ -37,6 +43,7 @@ function getTranslation(text) {
     return tl;
 }
 
+// Function to process a text node
 function processTextNode(node) {
     var text = node.textContent.trim();
 
@@ -51,6 +58,7 @@ function processTextNode(node) {
     }
 }
 
+// Function to process a node
 function processNode(node) {
     if (node.nodeType == 3) {
         processTextNode(node);
@@ -71,23 +79,28 @@ function processNode(node) {
         }
     }
 
+    // Recursively process child text nodes
     textNodesUnder(node).forEach(function(node) {
         processTextNode(node);
     });
 }
 
+// Function to refresh style localization
 function refresh_style_localization() {
     processNode(document.querySelector('.style_selections'));
 }
 
+// Function to localize the whole page
 function localizeWholePage() {
     processNode(gradioApp());
 
+    // Functions to get elements for each component
     function elem(comp) {
         var elem_id = comp.props.elem_id ? comp.props.elem_id : "component-" + comp.id;
         return gradioApp().getElementById(elem_id);
     }
 
+    // Loop through all components and localize them
     for (var comp of window.gradio_config.components) {
         if (comp.props.webui_tooltip) {
             let e = elem(comp);
@@ -109,11 +122,13 @@ function localizeWholePage() {
     }
 }
 
+// Event listener for DOMContentLoaded
 document.addEventListener("DOMContentLoaded", function() {
     if (!hasLocalization()) {
         return;
     }
 
+    // Observer to listen for UI updates
     onUiUpdate(function(m) {
         m.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
@@ -122,18 +137,19 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
+    // Localize the whole page
     localizeWholePage();
 
     if (localization.rtl) { // if the language is from right to left,
         (new MutationObserver((mutations, observer) => { // wait for the style to load
             mutations.forEach(mutation => {
                 mutation.addedNodes.forEach(node => {
-                    if (node.tagName === 'STYLE') {
+                    if (node.tagName === 'STYLE') { // find all rtl media rules
                         observer.disconnect();
 
-                        for (const x of node.sheet.rules) { // find all rtl media rules
+                        for (const x of node.sheet.rules) { // enable them
                             if (Array.from(x.media || []).includes('rtl')) {
-                                x.media.appendMedium('all'); // enable them
+                                x.media.appendMedium('all');
                             }
                         }
                     }
@@ -142,3 +158,4 @@ document.addEventListener("DOMContentLoaded", function() {
         })).observe(gradioApp(), {childList: true});
     }
 });
+
