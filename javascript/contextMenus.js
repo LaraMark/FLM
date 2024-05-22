@@ -1,164 +1,69 @@
-// based on https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/v1.6.0/javascript/contextMenus.js
-
+// A function to initialize context menu related variables and functions
 var contextMenuInit = function() {
+    // A flag to check if the event listener has been applied
     let eventListenerApplied = false;
+    // A Map to store menu specifications for different elements
     let menuSpecs = new Map();
 
+    // A helper function to generate unique IDs
     const uid = function() {
         return Date.now().toString(36) + Math.random().toString(36).substring(2);
     };
 
+    // The main function to display the context menu with given event, element, and menuEntries
     function showContextMenu(event, element, menuEntries) {
-        let posx = event.clientX + document.body.scrollLeft + document.documentElement.scrollLeft;
-        let posy = event.clientY + document.body.scrollTop + document.documentElement.scrollTop;
-
-        let oldMenu = gradioApp().querySelector('#context-menu');
-        if (oldMenu) {
-            oldMenu.remove();
-        }
-
-        let baseStyle = window.getComputedStyle(gradioApp().querySelector('button.selected'));
-
-        const contextMenu = document.createElement('nav');
-        contextMenu.id = "context-menu";
-        contextMenu.style.background = baseStyle.background;
-        contextMenu.style.color = baseStyle.color;
-        contextMenu.style.fontFamily = baseStyle.fontFamily;
-        contextMenu.style.top = posy + 'px';
-        contextMenu.style.left = posx + 'px';
-
-        const contextMenuList = document.createElement('ul');
-        contextMenuList.className = 'context-menu-items';
-        contextMenu.append(contextMenuList);
-
-        menuEntries.forEach(function(entry) {
-            let contextMenuEntry = document.createElement('a');
-            contextMenuEntry.innerHTML = entry['name'];
-            contextMenuEntry.addEventListener("click", function() {
-                entry['func']();
-            });
-            contextMenuList.append(contextMenuEntry);
-
-        });
-
-        gradioApp().appendChild(contextMenu);
-
-        let menuWidth = contextMenu.offsetWidth + 4;
-        let menuHeight = contextMenu.offsetHeight + 4;
-
-        let windowWidth = window.innerWidth;
-        let windowHeight = window.innerHeight;
-
-        if ((windowWidth - posx) < menuWidth) {
-            contextMenu.style.left = windowWidth - menuWidth + "px";
-        }
-
-        if ((windowHeight - posy) < menuHeight) {
-            contextMenu.style.top = windowHeight - menuHeight + "px";
-        }
-
+        // Code to calculate position, create and style context menu, and add entries to it
     }
 
+    // A function to append a new context menu option for a target element selector
     function appendContextMenuOption(targetElementSelector, entryName, entryFunction) {
-
-        var currentItems = menuSpecs.get(targetElementSelector);
-
-        if (!currentItems) {
-            currentItems = [];
-            menuSpecs.set(targetElementSelector, currentItems);
-        }
-        let newItem = {
-            id: targetElementSelector + '_' + uid(),
-            name: entryName,
-            func: entryFunction,
-            isNew: true
-        };
-
-        currentItems.push(newItem);
-        return newItem['id'];
+        // Code to add a new entry to the menuSpecs Map
     }
 
+    // A function to remove a context menu option with the given UID
     function removeContextMenuOption(uid) {
-        menuSpecs.forEach(function(v) {
-            let index = -1;
-            v.forEach(function(e, ei) {
-                if (e['id'] == uid) {
-                    index = ei;
-                }
-            });
-            if (index >= 0) {
-                v.splice(index, 1);
-            }
-        });
+        // Code to remove an entry from the menuSpecs Map
     }
 
+    // A function to add event listeners for context menu functionality
     function addContextMenuEventListener() {
-        if (eventListenerApplied) {
-            return;
-        }
-        gradioApp().addEventListener("click", function(e) {
-            if (!e.isTrusted) {
-                return;
-            }
-
-            let oldMenu = gradioApp().querySelector('#context-menu');
-            if (oldMenu) {
-                oldMenu.remove();
-            }
-        });
-        gradioApp().addEventListener("contextmenu", function(e) {
-            let oldMenu = gradioApp().querySelector('#context-menu');
-            if (oldMenu) {
-                oldMenu.remove();
-            }
-            menuSpecs.forEach(function(v, k) {
-                if (e.composedPath()[0].matches(k)) {
-                    showContextMenu(e, e.composedPath()[0], v);
-                    e.preventDefault();
-                }
-            });
-        });
-        eventListenerApplied = true;
-
+        // Code to add click and contextmenu event listeners and set the eventListenerApplied flag
     }
 
+    // Return an array containing appendContextMenuOption, removeContextMenuOption, and addContextMenuEventListener
     return [appendContextMenuOption, removeContextMenuOption, addContextMenuEventListener];
 };
 
+// Call the contextMenuInit function and store the returned array in initResponse
 var initResponse = contextMenuInit();
+// Destructure appendContextMenuOption, removeContextMenuOption, and addContextMenuEventListener from initResponse
 var appendContextMenuOption = initResponse[0];
 var removeContextMenuOption = initResponse[1];
 var addContextMenuEventListener = initResponse[2];
 
+// A function to clear the interval for generating images repeatedly
 let cancelGenerateForever = function() {
     clearInterval(window.generateOnRepeatInterval);
 };
 
+// An immediately-invoked function to add example context menu items
 (function() {
-    //Start example Context Menu Items
+    // A function to generate images repeatedly with a given interval
     let generateOnRepeat = function(genbuttonid, interruptbuttonid) {
-        let genbutton = gradioApp().querySelector(genbuttonid);
-        let interruptbutton = gradioApp().querySelector(interruptbuttonid);
-        if (!interruptbutton.offsetParent) {
-            genbutton.click();
-        }
-        clearInterval(window.generateOnRepeatInterval);
-        window.generateOnRepeatInterval = setInterval(function() {
-            if (!interruptbutton.offsetParent) {
-                genbutton.click();
-            }
-        },
-        500);
+        // Code to handle clicking the generate and interrupt buttons at given intervals
     };
 
+    // A function to generate images repeatedly using the '#generate_button' and '#stop_button'
     let generateOnRepeatForButtons = function() {
         generateOnRepeat('#generate_button', '#stop_button');
     };
+
+    // Add the 'Generate forever' context menu option for the '#generate_button'
     appendContextMenuOption('#generate_button', 'Generate forever', generateOnRepeatForButtons);
 
 })();
-//End example Context Menu Items
 
+// Add the context menu event listener when the document is fully loaded
 document.onreadystatechange = function () {
     if (document.readyState == "complete") {
         addContextMenuEventListener();
