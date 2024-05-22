@@ -5,13 +5,16 @@ import math
 import os
 import cv2
 
-from PIL import Image
-
-
+# Use LANCZOS resampling method for Image.resize() if it's available, otherwise default to LANCZOS
 LANCZOS = (Image.Resampling.LANCZOS if hasattr(Image, 'Resampling') else Image.LANCZOS)
 
-
 def erode_or_dilate(x, k):
+    """
+    Perform image dilation or erosion based on the input kernel value 'k'.
+    :param x: The input image as a numpy array.
+    :param k: The kernel size for dilation or erosion. Positive values for dilation, negative for erosion.
+    :return: The processed image as a numpy array.
+    """
     k = int(k)
     if k > 0:
         return cv2.dilate(x, kernel=np.ones(shape=(3, 3), dtype=np.uint8), iterations=k)
@@ -19,27 +22,30 @@ def erode_or_dilate(x, k):
         return cv2.erode(x, kernel=np.ones(shape=(3, 3), dtype=np.uint8), iterations=-k)
     return x
 
-
 def resample_image(im, width, height):
+    """
+    Resample an image using the LANCZOS method.
+    :param im: The input image as a numpy array.
+    :param width: The desired width of the output image.
+    :param height: The desired height of the output image.
+    :return: The resampled image as a numpy array.
+    """
     im = Image.fromarray(im)
     im = im.resize((int(width), int(height)), resample=LANCZOS)
     return np.array(im)
 
-
 def resize_image(im, width, height, resize_mode=1):
     """
-    Resizes an image with the specified resize_mode, width, and height.
-
-    Args:
-        resize_mode: The mode to use when resizing the image.
+    Resize an image based on the specified resize_mode, width, and height.
+    :param resize_mode: The mode to use when resizing the image.
             0: Resize the image to the specified width and height.
             1: Resize the image to fill the specified width and height, maintaining the aspect ratio, and then center the image within the dimensions, cropping the excess.
             2: Resize the image to fit within the specified width and height, maintaining the aspect ratio, and then center the image within the dimensions, filling empty with data from image.
-        im: The image to resize.
-        width: The width to resize the image to.
-        height: The height to resize the image to.
+        :param im: The input image as a numpy array.
+        :param width: The desired width of the output image.
+        :param height: The desired height of the output image.
+    :return: The resized image as a numpy array.
     """
-
     im = Image.fromarray(im)
 
     def resize(im, w, h):
@@ -83,22 +89,36 @@ def resize_image(im, width, height, resize_mode=1):
 
     return np.array(res)
 
-
 def get_shape_ceil(h, w):
+    """
+    Calculate the nearest multiple of 64 greater than or equal to the product of h and w.
+    :param h: The height value.
+    :param w: The width value.
+    :return: The nearest multiple of 64.
+    """
     return math.ceil(((h * w) ** 0.5) / 64.0) * 64.0
 
-
 def get_image_shape_ceil(im):
+    """
+    Calculate the nearest multiple of 64 greater than or equal to the product of the image's height and width.
+    :param im: The input image as a numpy array.
+    :return: The nearest multiple of 64.
+    """
     H, W = im.shape[:2]
     return get_shape_ceil(H, W)
 
-
 def set_image_shape_ceil(im, shape_ceil):
+    """
+    Resize the input image to the nearest multiple of 64 greater than or equal to the product of the image's height and width.
+    :param im: The input image as a numpy array.
+    :param shape_ceil: The nearest multiple of 64.
+    :return: The resized image as a numpy array.
+    """
     shape_ceil = float(shape_ceil)
 
     H_origin, W_origin, _ = im.shape
     H, W = H_origin, W_origin
-    
+
     for _ in range(256):
         current_shape_ceil = get_shape_ceil(H, W)
         if abs(current_shape_ceil - shape_ceil) < 0.1:
@@ -112,8 +132,12 @@ def set_image_shape_ceil(im, shape_ceil):
 
     return resample_image(im, width=W, height=H)
 
-
 def HWC3(x):
+    """
+    Convert the input image to a 3-channel format (RGB) if it's not already.
+    :param x: The input image as a numpy array.
+    :return: The 3-channel image as a numpy array.
+    """
     assert x.dtype == np.uint8
     if x.ndim == 2:
         x = x[:, :, None]
@@ -131,15 +155,25 @@ def HWC3(x):
         y = y.clip(0, 255).astype(np.uint8)
         return y
 
-
 def remove_empty_str(items, default=None):
+    """
+    Remove empty strings from the input list and return the updated list.
+    :param items: The input list.
+    :param default: The default value to return if the list is empty.
+    :return: The updated list or the default value.
+    """
     items = [x for x in items if x != ""]
     if len(items) == 0 and default is not None:
         return [default]
     return items
 
-
 def join_prompts(*args, **kwargs):
+    """
+    Join the input strings into a single string with commas as separators.
+    :param args: The input strings.
+    :param kwargs: Additional keyword arguments.
+    :return: The joined string.
+    """
     prompts = [str(x) for x in args if str(x) != ""]
     if len(prompts) == 0:
         return ""
@@ -147,8 +181,13 @@ def join_prompts(*args, **kwargs):
         return prompts[0]
     return ', '.join(prompts)
 
-
 def generate_temp_filename(folder='./outputs/', extension='png'):
+    """
+    Generate a temporary filename for storing the output image.
+    :param folder: The output folder path.
+    :param extension: The file extension.
+    :return: The date string, the absolute path of the temporary file, and the filename.
+    """
     current_time = datetime.datetime.now()
     date_string = current_time.strftime("%Y-%m-%d")
     time_string = current_time.strftime("%Y-%m-%d_%H-%M-%S")
@@ -157,8 +196,14 @@ def generate_temp_filename(folder='./outputs/', extension='png'):
     result = os.path.join(folder, date_string, filename)
     return date_string, os.path.abspath(os.path.realpath(result)), filename
 
-
 def get_files_from_folder(folder_path, exensions=None, name_filter=None):
+    """
+    Get a list of files from the input folder with the specified file extensions and name filter.
+    :param folder_path: The folder path.
+    :param exensions: The allowed file extensions.
+    :param name_filter: The name filter for the files.
+    :return: The sorted list of file paths.
+    """
     if not os.path.isdir(folder_path):
         raise ValueError("Folder path is not a valid directory.")
 
