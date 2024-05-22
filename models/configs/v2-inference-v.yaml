@@ -1,68 +1,174 @@
+# The model configuration for a diffusion model.
 model:
+  # Base learning rate for the model.
   base_learning_rate: 1.0e-4
+  
+  # The target model for the diffusion process.
   target: ldm.models.diffusion.ddpm.LatentDiffusion
+  
+  # The parameters for the target model.
   params:
+    # Parameterization method for the model.
     parameterization: "v"
+    
+    # The linear schedule for the model's noise.
     linear_start: 0.00085
     linear_end: 0.0120
+    
+    # The number of conditioning timesteps for the model.
     num_timesteps_cond: 1
+    
+    # The log interval for the model.
     log_every_t: 200
+    
+    # The number of timesteps for the model.
     timesteps: 1000
+    
+    # The key for the first stage of the model.
     first_stage_key: "jpg"
+    
+    # The key for the conditioning stage of the model.
     cond_stage_key: "txt"
+    
+    # The size of the input images for the model.
     image_size: 64
+    
+    # The number of channels in the input images for the model.
     channels: 4
+    
+    # Whether the conditioning stage of the model is trainable.
     cond_stage_trainable: false
+    
+    # The key for the conditioning in the model.
     conditioning_key: crossattn
+    
+    # The monitor for the model.
     monitor: val/loss_simple_ema
+    
+    # The scale factor for the model.
     scale_factor: 0.18215
+    
+    # Whether to use exponential moving average for the model.
     use_ema: False # we set this to false because this is an inference only config
-
+    
+    # The configuration for the U-Net model.
     unet_config:
+      # The target model for the U-Net.
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      
+      # The parameters for the U-Net model.
       params:
+        # Whether to use gradient checkpointing for the U-Net.
         use_checkpoint: True
+        
+        # Whether to use mixed precision training for the U-Net.
         use_fp16: True
+        
+        # The size of the input images for the U-Net.
         image_size: 32 # unused
+        
+        # The number of input channels for the U-Net.
         in_channels: 4
+        
+        # The number of output channels for the U-Net.
         out_channels: 4
+        
+        # The number of channels in the U-Net.
         model_channels: 320
+        
+        # The resolutions for attention in the U-Net.
         attention_resolutions: [ 4, 2, 1 ]
+        
+        # The number of residual blocks in the U-Net.
         num_res_blocks: 2
+        
+        # The channel multiplier for the U-Net.
         channel_mult: [ 1, 2, 4, 4 ]
+        
+        # The number of channels in the attention heads in the U-Net.
         num_head_channels: 64 # need to fix for flash-attn
+        
+        # Whether to use a spatial transformer in the U-Net.
         use_spatial_transformer: True
+        
+        # Whether to use a linear layer in the spatial transformer in the U-Net.
         use_linear_in_transformer: True
+        
+        # The depth of the transformer in the U-Net.
         transformer_depth: 1
+        
+        # The context dimension for the transformer in the U-Net.
         context_dim: 1024
+        
+        # Whether to use the legacy implementation of the U-Net.
         legacy: False
-
+    
+    # The configuration for the first stage of the model.
     first_stage_config:
+      # The target model for the first stage.
       target: ldm.models.autoencoder.AutoencoderKL
+      
+      # The parameters for the first stage model.
       params:
+        # The embedding dimension for the first stage.
         embed_dim: 4
+        
+        # The monitor for the first stage.
         monitor: val/rec_loss
+        
+        # The configuration for the variational autoencoder in the first stage.
         ddconfig:
+          # The attention type for the variational autoencoder.
           #attn_type: "vanilla-xformers"
+          
+          # Whether to double the latent code in the variational autoencoder.
           double_z: true
+          
+          # The number of channels in the latent code for the variational autoencoder.
           z_channels: 4
+          
+          # The resolution of the input images for the variational autoencoder.
           resolution: 256
+          
+          # The number of input channels for the variational autoencoder.
           in_channels: 3
+          
+          # The number of output channels for the variational autoencoder.
           out_ch: 3
+          
+          # The number of channels in the convolutional layers of the variational autoencoder.
           ch: 128
+          
+          # The channel multiplier for the convolutional layers of the variational autoencoder.
           ch_mult:
           - 1
           - 2
           - 4
           - 4
+          
+          # The number of residual blocks in the variational autoencoder.
           num_res_blocks: 2
+          
+          # The resolutions for attention in the variational autoencoder.
           attn_resolutions: []
+          
+          # The dropout rate for the variational autoencoder.
           dropout: 0.0
+        
+        # The configuration for the loss function in the first stage.
         lossconfig:
+          # The target for the loss function.
           target: torch.nn.Identity
 
+    # The configuration for the conditioning stage of the model.
     cond_stage_config:
+      # The target model for the conditioning stage.
       target: ldm.modules.encoders.modules.FrozenOpenCLIPEmbedder
+      
+      # The parameters for the conditioning stage model.
       params:
+        # Whether to freeze the weights of the conditioning stage model.
         freeze: True
+        
+        # The layer to use in the conditioning stage model.
         layer: "penultimate"
