@@ -9,9 +9,9 @@ def conv3x3(inplanes, outplanes, stride=1):
         outplanes (int): Channel number of outputs.
         stride (int): Stride in convolution. Default: 1.
     """
-    return nn.Conv2d(
-        inplanes, outplanes, kernel_size=3, stride=stride, padding=1, bias=False
-    )
+    # Return a 2D convolution layer with a 3x3 kernel, specified stride, padding of 1,
+    # and no bias.
+    return nn.Conv2d(inplanes, outplanes, kernel_size=3, stride=stride, padding=1, bias=False)
 
 
 class BasicBlock(nn.Module):
@@ -23,7 +23,6 @@ class BasicBlock(nn.Module):
         stride (int): Stride in convolution. Default: 1.
         downsample (nn.Module): The downsample module. Default: None.
     """
-
     expansion = 1  # output channel expansion ratio
 
     def __init__(self, inplanes, planes, stride=1, downsample=None):
@@ -91,6 +90,7 @@ class IRBlock(nn.Module):
 
         out = self.conv2(out)
         out = self.bn2(out)
+
         if self.use_se:
             out = self.se(out)
 
@@ -119,13 +119,9 @@ class Bottleneck(nn.Module):
         super(Bottleneck, self).__init__()
         self.conv1 = nn.Conv2d(inplanes, planes, kernel_size=1, bias=False)
         self.bn1 = nn.BatchNorm2d(planes)
-        self.conv2 = nn.Conv2d(
-            planes, planes, kernel_size=3, stride=stride, padding=1, bias=False
-        )
+        self.conv2 = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
-        self.conv3 = nn.Conv2d(
-            planes, planes * self.expansion, kernel_size=1, bias=False
-        )
+        self.conv3 = nn.Conv2d(planes, planes * self.expansion, kernel_size=1, bias=False)
         self.bn3 = nn.BatchNorm2d(planes * self.expansion)
         self.relu = nn.ReLU(inplace=True)
         self.downsample = downsample
@@ -164,9 +160,7 @@ class SEBlock(nn.Module):
 
     def __init__(self, channel, reduction=16):
         super(SEBlock, self).__init__()
-        self.avg_pool = nn.AdaptiveAvgPool2d(
-            1
-        )  # pool to 1x1 without spatial information
+        self.avg_pool = nn.AdaptiveAvgPool2d(1)  # pool to 1x1 without spatial information
         self.fc = nn.Sequential(
             nn.Linear(channel, channel // reduction),
             nn.PReLU(),
