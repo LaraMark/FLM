@@ -1,11 +1,11 @@
-/* based on https://github.com/AUTOMATIC1111/stable-diffusion-webui/blob/v1.6.0/style.css */
-
+/* Loader container styling */
 .loader-container {
   display: flex; /* Use flex to align items horizontally */
   align-items: center; /* Center items vertically within the container */
   white-space: nowrap; /* Prevent line breaks within the container */
 }
 
+/* Loader animation styling */
 .loader {
   border: 8px solid #f3f3f3; /* Light grey */
   border-top: 8px solid #3498db; /* Blue */
@@ -20,7 +20,7 @@
   100% { transform: rotate(360deg); }
 }
 
-/* Style the progress bar */
+/* Progress bar styling */
 progress {
   appearance: none; /* Remove default styling */
   height: 20px; /* Set the height of the progress bar */
@@ -29,14 +29,14 @@ progress {
   width: 100%;
 }
 
-/* Style the progress bar container */
+/* Progress bar container styling */
 .progress-container {
   margin-left: 20px;
   margin-right: 20px;
   flex-grow: 1; /* Allow the progress container to take up remaining space */
 }
 
-/* Set the color of the progress bar fill */
+/* Style the progress bar fill */
 progress::-webkit-progress-value {
   background-color: #3498db; /* Blue color for the fill */
 }
@@ -61,14 +61,12 @@ progress::after {
   margin-left: 5px; /* Add spacing between the progress bar and the text */
 }
 
+/* Hide generating text in progress bar */
 .progress-bar > .generating {
   display: none !important;
 }
 
-.progress-bar{
-  height: 30px !important;
-}
-
+/* Style the type rows */
 .type_row{
   height: 80px !important;
 }
@@ -77,10 +75,12 @@ progress::after {
   height: 32px !important;
 }
 
+/* Style scrollable area */
 .scroll-hide{
   resize: none !important;
 }
 
+/* Style refresh button */
 .refresh_button{
   border: none !important;
   background: none !important;
@@ -88,6 +88,7 @@ progress::after {
   box-shadow: none !important;
 }
 
+/* Style advanced check row */
 .advanced_check_row{
   width: 250px !important;
 }
@@ -96,11 +97,13 @@ progress::after {
   min-width: min(1px, 100%) !important;
 }
 
+/* Style resizable area */
 .resizable_area {
   resize: vertical;
   overflow: auto !important;
 }
 
+/* Style aspect ratios label */
 .aspect_ratios label {
     width: 140px !important;
 }
@@ -113,6 +116,7 @@ progress::after {
     margin-left: -5px !important;
 }
 
+/* Style Lora enable label */
 .lora_enable label {
   height: 100%;
 }
@@ -125,12 +129,14 @@ progress::after {
   display: none;
 }
 
+/* Style Lora weight input for Firefox */
 @-moz-document url-prefix() {
   .lora_weight input[type=number] {
     width: 80px;
   }
 }
 
+/* Style context menu */
 #context-menu{
     z-index:9999;
     position:absolute;
@@ -158,6 +164,7 @@ progress::after {
     background: #a55000;
 }
 
+/* Style canvas tooltip info */
 .canvas-tooltip-info {
   position: absolute;
   top: 28px;
@@ -192,6 +199,7 @@ progress::after {
   background-color: white;
 }
 
+/* Style canvas tooltip content */
 .canvas-tooltip-content {
   display: none;
   background-color: #f9f9f9;
@@ -221,15 +229,17 @@ progress::after {
   to {opacity: 1;}
 }
 
+/* Style styler */
 .styler {
   overflow:inherit !important;
 }
 
+/* Style gradio container */
 .gradio-container{
   overflow: visible;
 }
 
-/* fullpage image viewer */
+/* Fullpage image viewer */
 
 #lightboxModal{
     display: none;
@@ -350,7 +360,7 @@ progress::after {
     transform: translate(-140px, -140px);
 }
 
-/* scrollable box for style selections */
+/* Styles for scrollable box for style selections */
 .contain .tabs {
   height: 100%;
 }
@@ -386,7 +396,7 @@ progress::after {
   text-overflow: ellipsis;
 }
 
-/* styles preview tooltip */
+/* Styles for preview tooltip */
 .preview-tooltip {
   background-color: #fff8;
   font-family: monospace;
