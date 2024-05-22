@@ -1,15 +1,29 @@
-image_root: '/export/share/datasets/vision/nocaps/'
-ann_root: 'annotation'
+# Set the root directory for the image and annotation datasets
+image_root = '/export/share/datasets/vision/nocaps/'
+ann_root = 'annotation'
 
-# set pretrained as a file path or an url
-pretrained: 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_caption_capfilt_large.pth'
+# Define the pretrained model file path or URL
+# The pretrained model will be used for captioning
+pretrained = 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_caption_capfilt_large.pth'
 
-vit: 'base'
-batch_size: 32
+# Specify the vision transformer model type
+# Currently supports 'base' and 'large'
+vit = 'base'
 
-image_size: 384
+# Set the batch size for processing images
+batch_size = 32
 
-max_length: 20
-min_length: 5
-num_beams: 3
-prompt: 'a picture of '
+# Define the image size for the vision transformer model
+image_size = 384
+
+# Set the maximum and minimum length for the generated captions
+max_length = 20
+min_length = 5
+
+# Define the number of beams for beam search decoding
+# This parameter controls the diversity and quality of generated captions
+num_beams = 3
+
+# Define the prompt for generating captions
+# The generated captions will start with this prompt
+prompt = 'a picture of '
