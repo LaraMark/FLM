@@ -11,11 +11,13 @@ import numpy as np
 import json
 import os
 
+# Define the maximum resolution allowed for the image
 MAX_RESOLUTION = ldm_patched.contrib.external.MAX_RESOLUTION
 
 class ImageCrop:
     @classmethod
     def INPUT_TYPES(s):
+        # Define the required input types for the ImageCrop class method
         return {"required": { "image": ("IMAGE",),
                               "width": ("INT", {"default": 512, "min": 1, "max": MAX_RESOLUTION, "step": 1}),
                               "height": ("INT", {"default": 512, "min": 1, "max": MAX_RESOLUTION, "step": 1}),
@@ -28,6 +30,7 @@ class ImageCrop:
     CATEGORY = "image/transform"
 
     def crop(self, image, width, height, x, y):
+        # Crop the image based on the given width, height, x, and y coordinates
         x = min(x, image.shape[2] - 1)
         y = min(y, image.shape[1] - 1)
         to_x = width + x
@@ -38,6 +41,7 @@ class ImageCrop:
 class RepeatImageBatch:
     @classmethod
     def INPUT_TYPES(s):
+        # Define the required input types for the RepeatImageBatch class method
         return {"required": { "image": ("IMAGE",),
                               "amount": ("INT", {"default": 1, "min": 1, "max": 64}),
                               }}
@@ -47,11 +51,13 @@ class RepeatImageBatch:
     CATEGORY = "image/batch"
 
     def repeat(self, image, amount):
+        # Repeat the given image by the specified amount
         s = image.repeat((amount, 1,1,1))
         return (s,)
 
 class SaveAnimatedWEBP:
     def __init__(self):
+        # Initialize the SaveAnimatedWEBP class with the output directory and type
         self.output_dir = ldm_patched.utils.path_utils.get_output_directory()
         self.type = "output"
         self.prefix_append = ""
@@ -59,6 +65,7 @@ class SaveAnimatedWEBP:
     methods = {"default": 4, "fastest": 0, "slowest": 6}
     @classmethod
     def INPUT_TYPES(s):
+        # Define the required and hidden input types for the SaveAnimatedWEBP class method
         return {"required":
                     {"images": ("IMAGE", ),
                      "filename_prefix": ("STRING", {"default": "ldm_patched"}),
@@ -79,6 +86,7 @@ class SaveAnimatedWEBP:
     CATEGORY = "image/animation"
 
     def save_images(self, images, fps, filename_prefix, lossless, quality, method, num_frames=0, prompt=None, extra_pnginfo=None):
+        # Save the animated webp file with the given images, fps, filename_prefix, lossless, quality, method, and num_frames
         method = self.methods.get(method)
         filename_prefix += self.prefix_append
         full_output_folder, filename, counter, subfolder, filename_prefix = ldm_patched.utils.path_utils.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
@@ -118,12 +126,14 @@ class SaveAnimatedWEBP:
 
 class SaveAnimatedPNG:
     def __init__(self):
+        # Initialize the SaveAnimatedPNG class with the output directory and type
         self.output_dir = ldm_patched.utils.path_utils.get_output_directory()
         self.type = "output"
         self.prefix_append = ""
 
     @classmethod
     def INPUT_TYPES(s):
+        # Define the required and hidden input types for the SaveAnimatedPNG class method
         return {"required":
                     {"images": ("IMAGE", ),
                      "filename_prefix": ("STRING", {"default": "ldm_patched"}),
@@ -141,6 +151,7 @@ class SaveAnimatedPNG:
     CATEGORY = "image/animation"
 
     def save_images(self, images, fps, compress_level, filename_prefix="ldm_patched", prompt=None, extra_pnginfo=None):
+        # Save the animated png file with the given images, fps, filename_prefix, and compress_level
         filename_prefix += self.prefix_append
         full_output_folder, filename, counter, subfolder, filename_prefix = ldm_patched.utils.path_utils.get_save_image_path(filename_prefix, self.output_dir, images[0].shape[1], images[0].shape[0])
         results = list()
