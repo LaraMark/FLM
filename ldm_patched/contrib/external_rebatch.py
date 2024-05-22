@@ -3,11 +3,13 @@
 import torch
 
 class LatentRebatch:
+    # Define the required input types for the LatentRebatch class
     @classmethod
     def INPUT_TYPES(s):
         return {"required": { "latents": ("LATENT",),
                               "batch_size": ("INT", {"default": 1, "min": 1, "max": 4096}),
                               }}
+    # Define the return types for the LatentRebatch class
     RETURN_TYPES = ("LATENT",)
     INPUT_IS_LIST = True
     OUTPUT_IS_LIST = (True, )
@@ -19,17 +21,22 @@ class LatentRebatch:
     @staticmethod
     def get_batch(latents, list_ind, offset):
         '''prepare a batch out of the list of latents'''
+        # Extract the samples and noise mask from the current latent
         samples = latents[list_ind]['samples']
         shape = samples.shape
         mask = latents[list_ind]['noise_mask'] if 'noise_mask' in latents[list_ind] else torch.ones((shape[0], 1, shape[2]*8, shape[3]*8), device='cpu')
+        # If the noise mask shape doesn't match the samples shape, resize it
         if mask.shape[-1] != shape[-1] * 8 or mask.shape[-2] != shape[-2]:
-            torch.nn.functional.interpolate(mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1])), size=(shape[-2]*8, shape[-1]*8), mode="bilinear")
+            mask = torch.nn.functional.interpolate(mask.reshape((-1, 1, mask.shape[-2], mask.shape[-1])), size=(shape[-2]*8, shape[-1]*8), mode="bilinear")
+        # If the noise mask length is less than the samples length, repeat it
         if mask.shape[0] < samples.shape[0]:
             mask = mask.repeat((shape[0] - 1) // mask.shape[0] + 1, 1, 1, 1)[:shape[0]]
+        # If the current latent has batch_index, assign it to batch_inds
         if 'batch_index' in latents[list_ind]:
             batch_inds = latents[list_ind]['batch_index']
         else:
             batch_inds = [x+offset for x in range(shape[0])]
+        # Return the prepared batch
         return samples, mask, batch_inds
 
     @staticmethod
@@ -38,6 +45,7 @@ class LatentRebatch:
         slices = []
         for i in range(num):
             slices.append(indexable[i*batch_size:(i+1)*batch_size])
+        # If the length of indexable is greater than the calculated length, return the remainder
         if num * batch_size < len(indexable):
             return slices, indexable[num * batch_size:]
         else:
@@ -63,38 +71,37 @@ class LatentRebatch:
         processed = 0
 
         for i in range(len(latents)):
-            # fetch new entry of list
-            #samples, masks, indices = self.get_batch(latents, i)
+            # Fetch the next batch from the list of latents
             next_batch = self.get_batch(latents, i, processed)
             processed += len(next_batch[2])
-            # set to current if current is None
+            # If the current batch is None, set it to the next batch
             if current_batch[0] is None:
                 current_batch = next_batch
-            # add previous to list if dimensions do not match
+            # If the shapes of the current and next batches don't match, add the current batch to the output list
             elif next_batch[0].shape[-1] != current_batch[0].shape[-1] or next_batch[0].shape[-2] != current_batch[0].shape[-2]:
                 sliced, _ = self.slice_batch(current_batch, 1, batch_size)
                 output_list.append({'samples': sliced[0][0], 'noise_mask': sliced[1][0], 'batch_index': sliced[2][0]})
                 current_batch = next_batch
-            # cat if everything checks out
+            # Concatenate the current and next batches if their shapes match
             else:
                 current_batch = self.cat_batch(current_batch, next_batch)
 
-            # add to list if dimensions gone above target batch size
+            # If the length of the current batch exceeds the target batch size, slice it and add the slices to the output list
             if current_batch[0].shape[0] > batch_size:
                 num = current_batch[0].shape[0] // batch_size
                 sliced, remainder = self.slice_batch(current_batch, num, batch_size)
-                
+
                 for i in range(num):
                     output_list.append({'samples': sliced[0][i], 'noise_mask': sliced[1][i], 'batch_index': sliced[2][i]})
 
                 current_batch = remainder
 
-        #add remainder
+        # If the current batch is not empty, slice it and add it to the output list
         if current_batch[0] is not None:
             sliced, _ = self.slice_batch(current_batch, 1, batch_size)
             output_list.append({'samples': sliced[0][0], 'noise_mask': sliced[1][0], 'batch_index': sliced[2][0]})
 
-        #get rid of empty masks
+        # Remove empty noise masks from the output list
         for s in output_list:
             if s['noise_mask'].mean() == 1.0:
                 del s['noise_mask']
