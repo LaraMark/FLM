@@ -1,25 +1,56 @@
+# The root directory of the VQA dataset
 vqa_root: '/export/share/datasets/vision/VQA/Images/mscoco/' #followed by train2014/
+
+# The root directory of the Visual Genome dataset
 vg_root: '/export/share/datasets/vision/visual-genome/'  #followed by image/
+
+# List of train files for VQA and Visual Genome datasets
 train_files: ['vqa_train','vqa_val','vg_qa']
+
+# The root directory of the annotations for VQA and Visual Genome datasets
 ann_root: 'annotation'
 
-# set pretrained as a file path or an url
+# The file path or URL for the pretrained model
+# It can be set to a file path or an URL
 pretrained: 'https://storage.googleapis.com/sfr-vision-language-research/BLIP/models/model_base_vqa_capfilt_large.pth'
 
-# size of vit model; base or large
+# The size of the Vision Transformer (ViT) model
+# It can be set to 'base' or 'large'
 vit: 'base'
+
+# Batch size for training
 batch_size_train: 16 
+
+# Batch size for testing
 batch_size_test: 32 
+
+# Whether to save the gradients of the Vision Transformer model
+# during training or not
 vit_grad_ckpt: False
+
+# The layer number of the Vision Transformer model to save the gradients
+# during training
 vit_ckpt_layer: 0
+
+# The initial learning rate for training
 init_lr: 2e-5
 
+# The size of the input image
 image_size: 480
 
+# The number of top-k predictions to keep during testing
 k_test: 128
+
+# The inference method to use during testing
+# It can be set to 'rank' or 'vote'
 inference: 'rank'
 
-# optimizer
+# The optimizer settings
+# Weight decay value for the optimizer
 weight_decay: 0.05
+
+# The minimum learning rate value for the optimizer
 min_lr: 0
+
+# The maximum number of epochs for training
 max_epoch: 10
