@@ -1,4 +1,5 @@
-"""Modified from https://github.com/chaofengc/PSFRGAN
+"""
+Modified from https://github.com/chaofengc/PSFRGAN
 """
 import numpy as np
 import torch.nn as nn
@@ -6,17 +7,19 @@ from torch.nn import functional as F
 
 
 class NormLayer(nn.Module):
-    """Normalization Layers.
+    """
+    Normalization Layers.
 
     Args:
-        channels: input channels, for batch norm and instance norm.
-        input_size: input shape without batch size, for layer norm.
+        channels (int): input channels, for batch norm and instance norm.
+        input_size (tuple): input shape without batch size, for layer norm.
     """
 
     def __init__(self, channels, normalize_shape=None, norm_type='bn'):
         super(NormLayer, self).__init__()
         norm_type = norm_type.lower()
-        self.norm_type = norm_type
+
+        # Initialize the normalization layer based on the user's choice
         if norm_type == 'bn':
             self.norm = nn.BatchNorm2d(channels, affine=True)
         elif norm_type == 'in':
@@ -33,6 +36,16 @@ class NormLayer(nn.Module):
             assert 1 == 0, f'Norm type {norm_type} not support.'
 
     def forward(self, x, ref=None):
+        """
+        Perform forward pass through the normalization layer.
+
+        Args:
+            x (torch.Tensor): input tensor
+            ref (torch.Tensor): reference tensor for Spatially-Adaptive Normalization (SPADE)
+
+        Returns:
+            torch.Tensor: normalized tensor
+        """
         if self.norm_type == 'spade':
             return self.norm(x, ref)
         else:
@@ -40,10 +53,12 @@ class NormLayer(nn.Module):
 
 
 class ReluLayer(nn.Module):
-    """Relu Layer.
+    """
+    Relu Layer.
 
     Args:
-        relu type: type of relu layer, candidates are
+        channels (int): number of channels in the input tensor
+        relu_type (str): type of relu layer, candidates are
             - ReLU
             - LeakyReLU: default relu slope 0.2
             - PRelu
@@ -54,6 +69,8 @@ class ReluLayer(nn.Module):
     def __init__(self, channels, relu_type='relu'):
         super(ReluLayer, self).__init__()
         relu_type = relu_type.lower()
+
+        # Initialize the activation layer based on the user's choice
         if relu_type == 'relu':
             self.func = nn.ReLU(True)
         elif relu_type == 'leakyrelu':
@@ -68,6 +85,15 @@ class ReluLayer(nn.Module):
             assert 1 == 0, f'Relu type {relu_type} not support.'
 
     def forward(self, x):
+        """
+        Perform forward pass through the activation layer.
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: activated tensor
+        """
         return self.func(x)
 
 
@@ -85,6 +111,9 @@ class ConvLayer(nn.Module):
         super(ConvLayer, self).__init__()
         self.use_pad = use_pad
         self.norm_type = norm_type
+
+        # Initialize the convolutional layer with the user's choice of scale,
+        # normalization, and activation functions
         if norm_type in ['bn']:
             bias = False
 
@@ -101,6 +130,15 @@ class ConvLayer(nn.Module):
         self.norm = NormLayer(out_channels, norm_type=norm_type)
 
     def forward(self, x):
+        """
+        Perform forward pass through the convolutional layer.
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: convolved tensor
+        """
         out = self.scale_func(x)
         if self.use_pad:
             out = self.reflection_pad(out)
@@ -118,6 +156,7 @@ class ResidualBlock(nn.Module):
     def __init__(self, c_in, c_out, relu_type='prelu', norm_type='bn', scale='none'):
         super(ResidualBlock, self).__init__()
 
+        # Initialize the shortcut connection and the residual blocks
         if scale == 'none' and c_in == c_out:
             self.shortcut_func = lambda x: x
         else:
@@ -130,6 +169,15 @@ class ResidualBlock(nn.Module):
         self.conv2 = ConvLayer(c_out, c_out, 3, scale_conf[1], norm_type=norm_type, relu_type='none')
 
     def forward(self, x):
+        """
+        Perform forward pass through the residual block.
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            torch.Tensor: output tensor
+        """
         identity = self.shortcut_func(x)
 
         res = self.conv1(x)
@@ -154,38 +202,43 @@ class ParseNet(nn.Module):
         act_args = {'norm_type': norm_type, 'relu_type': relu_type}
         min_ch, max_ch = ch_range
 
+        # Initialize the encoder, body, and decoder of the network
         ch_clip = lambda x: max(min_ch, min(x, max_ch))  # noqa: E731
         min_feat_size = min(in_size, min_feat_size)
 
         down_steps = int(np.log2(in_size // min_feat_size))
         up_steps = int(np.log2(out_size // min_feat_size))
 
-        # =============== define encoder-body-decoder ====================
-        self.encoder = []
-        self.encoder.append(ConvLayer(3, base_ch, 3, 1))
+        self.encoder = nn.Sequential(
+            ConvLayer(3, base_ch, 3, 1),
+        )
         head_ch = base_ch
         for i in range(down_steps):
             cin, cout = ch_clip(head_ch), ch_clip(head_ch * 2)
-            self.encoder.append(ResidualBlock(cin, cout, scale='down', **act_args))
+            self.encoder.add_module(f'down_{i}', ResidualBlock(cin, cout, **act_args))
             head_ch = head_ch * 2
 
-        self.body = []
-        for i in range(res_depth):
-            self.body.append(ResidualBlock(ch_clip(head_ch), ch_clip(head_ch), **act_args))
+        self.body = nn.Sequential(
+            *[ResidualBlock(ch_clip(head_ch), ch_clip(head_ch), **act_args) for _ in range(res_depth)]
+        )
 
-        self.decoder = []
-        for i in range(up_steps):
-            cin, cout = ch_clip(head_ch), ch_clip(head_ch // 2)
-            self.decoder.append(ResidualBlock(cin, cout, scale='up', **act_args))
-            head_ch = head_ch // 2
+        self.decoder = nn.Sequential(
+            *[ResidualBlock(ch_clip(head_ch), ch_clip(head_ch // 2), **act_args) for _ in range(up_steps)]
+        )
 
-        self.encoder = nn.Sequential(*self.encoder)
-        self.body = nn.Sequential(*self.body)
-        self.decoder = nn.Sequential(*self.decoder)
         self.out_img_conv = ConvLayer(ch_clip(head_ch), 3)
         self.out_mask_conv = ConvLayer(ch_clip(head_ch), parsing_ch)
 
     def forward(self, x):
+        """
+        Perform forward pass through the network.
+
+        Args:
+            x (torch.Tensor): input tensor
+
+        Returns:
+            tuple: output tensors for the image and the mask
+        """
         feat = self.encoder(x)
         x = feat + self.body(feat)
         x = self.decoder(x)
