@@ -2,16 +2,17 @@ import os
 import re
 import json
 import math
-import modules.config
+import modules.config  # cannot use modules.config - validators causing circular imports
 
 from modules.util import get_files_from_folder
 
-# cannot use modules.config - validators causing circular imports
+# Set the path for the style files
 styles_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '../sdxl_styles/'))
-wildcards_max_bfs_depth = 64
-
+wildcards_max_bfs_depth = 64  # maximum depth for Breadth-First Search when processing wildcards
 
 def normalize_key(k):
+    # Normalize the key by replacing '-' with ' ', capitalizing the first letter of each word,
+    # and converting the first letter of the words '3d', 'Sai', 'Mre', and '(s' to uppercase
     k = k.replace('-', ' ')
     words = k.split(' ')
     words = [w[:1].upper() + w[1:].lower() for w in words]
@@ -23,19 +24,25 @@ def normalize_key(k):
     return k
 
 
-styles = {}
+styles = {}  # dictionary to store the style information
 
 styles_files = get_files_from_folder(styles_path, ['.json'])
 
-for x in ['sdxl_styles_fooocus.json',
-          'sdxl_styles_sai.json',
-          'sdxl_styles_mre.json',
-          'sdxl_styles_twri.json',
-          'sdxl_styles_diva.json',
-          'sdxl_styles_marc_k3nt3l.json']:
-    if x in styles_files:
-        styles_files.remove(x)
-        styles_files.append(x)
+# List of style files to be loaded in a specific order
+style_files_to_load = [
+    'sdxl_styles_fooocus.json',
+    'sdxl_styles_sai.json',
+    'sdxl_styles_mre.json',
+    'sdxl_styles_twri.json',
+    'sdxl_styles_diva.json',
+    'sdxl_styles_marc_k3nt3l.json'
+]
+
+# Load the style files
+for styles_file in styles_files:
+    if styles_file in style_files_to_load:
+        styles_files.remove(styles_file)
+        styles_files.append(styles_file)
 
 for styles_file in styles_files:
     try:
@@ -49,17 +56,20 @@ for styles_file in styles_files:
         print(str(e))
         print(f'Failed to load style file {styles_file}')
 
+# List of legal style names
 style_keys = list(styles.keys())
 fooocus_expansion = "Fooocus V2"
 legal_style_names = [fooocus_expansion] + style_keys
 
 
 def apply_style(style, positive):
+    # Apply the specified style to the positive prompt
     p, n = styles[style]
     return p.replace('{prompt}', positive).splitlines(), n.splitlines()
 
 
 def apply_wildcards(wildcard_text, rng, i, read_wildcards_in_order):
+    # Process wildcards in the text up to a maximum depth
     for _ in range(wildcards_max_bfs_depth):
         placeholders = re.findall(r'__([\w-]+)__', wildcard_text)
         if len(placeholders) == 0:
@@ -87,6 +97,7 @@ def apply_wildcards(wildcard_text, rng, i, read_wildcards_in_order):
 
 
 def get_words(arrays, totalMult, index):
+    # Return a list of words from the input arrays based on the index
     if len(arrays) == 1:
         return [arrays[0].split(',')[index]]
     else:
@@ -99,6 +110,7 @@ def get_words(arrays, totalMult, index):
 
 
 def apply_arrays(text, index):
+    # Process arrays in the text and replace them with words from the arrays
     arrays = re.findall(r'\[\[(.*?)\]\]', text)
     if len(arrays) == 0:
         return text
