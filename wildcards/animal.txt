@@ -1,100 +1,101 @@
-Alligator
-Ant
-Antelope
-Armadillo
-Badger
-Bat
-Bear
-Beaver
-Bison
-Boar
-Bobcat
-Bull
-Camel
-Chameleon
-Cheetah
-Chicken
-Chihuahua
-Chimpanzee
-Chinchilla
-Chipmunk
-Komodo Dragon
-Cow
-Coyote
-Crocodile
-Crow
-Deer
-Dinosaur
-Dolphin
-Donkey
-Duck
-Eagle
-Eel
-Elephant
-Elk
-Emu
-Falcon
-Ferret
-Flamingo
-Flying Squirrel
-Giraffe
-Goose
-Guinea pig
-Hawk
-Hedgehog
-Hippopotamus
-Horse
-Hummingbird
-Hyena
-Jackal
-Jaguar
-Jellyfish
-Kangaroo
-King Cobra
-Koala bear
-Leopard
-Lion
-Lizard
-Magpie
-Marten
-Meerkat
-Mole
-Monkey
-Moose
-Mouse
-Octopus
-Okapi
-Orangutan
-Ostrich
-Otter
-Owl
-Panda
-Pangolin
-Panther
-Penguin
-Pig
-Porcupine
-Possum
-Puma
-Quokka
-Rabbit
-Raccoon
-Raven
-Reindeer
-Rhinoceros
-Seal
-Shark
-Sheep
-Snail
-Snake
-Sparrow
-Spider
-Squirrel
-Swallow
-Tiger
-Walrus
-Whale
-Wolf
-Wombat
-Yak
-Zebra
+# List of animal names
+Alligator # A type of large reptile
+Ant # A small insect
+Antelope # A type of herbivorous mammal
+Armadillo # A type of mammal with a protective armor
+Badger # A type of mammal known for its digging ability
+Bat # A type of mammal that can fly
+Bear # A type of large carnivorous mammal
+Beaver # A type of large rodent known for building dams
+Bison # A type of large herbivorous mammal
+Boar # A type of wild pig
+Bobcat # A type of wild cat
+Bull # A male cattle
+Camel # A type of large mammal known for its ability to survive in desert conditions
+Chameleon # A type of reptile known for its ability to change color
+Cheetah # A type of large cat known for its speed
+Chicken # A type of domesticated bird
+Chihuahua # A breed of small dog
+Chimpanzee # A type of primate
+Chinchilla # A type of rodent
+Chipmunk # A type of rodent
+Komodo Dragon # A type of large lizard
+Cow # A type of domesticated cattle
+Coyote # A type of wild dog
+Crocodile # A type of large reptile
+Crow # A type of bird
+Deer # A type of herbivorous mammal
+Dinosaur # A type of extinct reptile
+Dolphin # A type of marine mammal
+Donkey # A type of domesticated ass
+Duck # A type of waterbird
+Eagle # A type of bird of prey
+Eel # A type of long, slender fish
+Elephant # A type of large mammal known for its long tusks
+Elk # A type of large deer
+Emu # A type of large, flightless bird
+Falcon # A type of bird of prey
+Ferret # A type of mammal similar to weasels
+Flamingo # A type of large wading bird with long legs and a curved beak
+Flying Squirrel # A type of small rodent that can glide through the air
+Giraffe # A type of large mammal known for its long neck
+Goose # A type of waterbird
+Guinea pig # A type of small rodent
+Hawk # A type of bird of prey
+Hedgehog # A type of small mammal with spines on its back
+Hippopotamus # A type of large, semiaquatic mammal
+Horse # A type of domesticated mammal
+Hummingbird # A type of small bird that can hover in mid-air
+Hyena # A type of large carnivorous mammal
+Jackal # A type of wild dog
+Jaguar # A type of large cat
+Jellyfish # A type of marine invertebrate
+Kangaroo # A type of large marsupial known for its powerful hind legs
+King Cobra # A type of large, venomous snake
+Koala bear # A type of marsupial known for its diet of eucalyptus leaves
+Leopard # A type of large cat
+Lion # A type of large cat
+Lizard # A type of reptile
+Magpie # A type of bird known for its black and white plumage
+Marten # A type of mammal similar to weasels
+Meerkat # A type of small carnivorous mammal
+Mole # A type of small mammal known for its digging ability
+Monkey # A type of primate
+Moose # A type of large herbivorous mammal
+Mouse # A type of small mammal
+Octopus # A type of marine invertebrate
+Okapi # A type of mammal similar to giraffes
+Orangutan # A type of primate
+Ostrich # A type of large, flightless bird
+Otter # A type of mammal known for its semiaquatic lifestyle
+Owl # A type of bird known for its nocturnal habits
+Panda # A type of mammal known for its black and white fur and diet of bamboo
+Pangolin # A type of mammal known for its protective scales
+Panther # A type of large cat
+Penguin # A type of flightless bird that lives in the Southern Hemisphere
+Pig # A type of domesticated mammal
+Porcupine # A type of mammal known for its sharp quills
+Possum # A type of marsupial
+Puma # A type of large cat
+Quokka # A type of small wallaby
+Rabbit # A type of small mammal known for its long ears
+Raccoon # A type of mammal known for its dexterity and omnivorous diet
+Raven # A type of bird known for its intelligence
+Reindeer # A type of large deer
+Rhinoceros # A type of large, horned mammal
+Seal # A type of marine mammal
+Shark # A type of elasmobranch fish
+Sheep # A type of domesticated mammal
+Snail # A type of mollusk
+Snake # A type of reptile
+Sparrow # A type of small bird
+Spider # A type of arachnid
+Squirrel # A type of small mammal
+Swallow # A type of small bird
+Tiger # A type of large cat
+Walrus # A type of marine mammal
+Whale # A type of marine mammal
+Wolf # A type of wild dog
+Wombat # A type of marsupial
+Yak # A type of large, horned mammal
+Zebra # A type of herbivorous mammal known for its black and white stripes
