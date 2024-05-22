@@ -1,74 +1,191 @@
-model:
-  base_learning_rate: 1.0e-04
-  target: ldm.models.diffusion.ddpm.LatentDiffusion
-  params:
-    linear_start: 0.00085
-    linear_end: 0.0120
-    num_timesteps_cond: 1
-    log_every_t: 200
-    timesteps: 1000
-    first_stage_key: "jpg"
-    cond_stage_key: "txt"
-    image_size: 64
-    channels: 4
-    cond_stage_trainable: false   # Note: different from the one we trained before
-    conditioning_key: crossattn
-    monitor: val/loss_simple_ema
-    scale_factor: 0.18215
-    use_ema: False
+# Define the configuration for a model used in a machine learning task.
+model = {
+  # Base learning rate for the optimizer.
+  "base_learning_rate": 1.0e-04,
 
-    scheduler_config: # 10000 warmup steps
-      target: ldm.lr_scheduler.LambdaLinearScheduler
-      params:
-        warm_up_steps: [ 10000 ]
-        cycle_lengths: [ 10000000000000 ] # incredibly large number to prevent corner cases
-        f_start: [ 1.e-6 ]
-        f_max: [ 1. ]
-        f_min: [ 1. ]
+  # The target model to be used.
+  "target": "ldm.models.diffusion.ddpm.LatentDiffusion",
 
-    unet_config:
-      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
-      params:
-        use_fp16: True
-        image_size: 32 # unused
-        in_channels: 4
-        out_channels: 4
-        model_channels: 320
-        attention_resolutions: [ 4, 2, 1 ]
-        num_res_blocks: 2
-        channel_mult: [ 1, 2, 4, 4 ]
-        num_heads: 8
-        use_spatial_transformer: True
-        transformer_depth: 1
-        context_dim: 768
-        use_checkpoint: True
-        legacy: False
+  # Parameters for the target model.
+  "params": {
+    # Coefficients for linear schedule of stddev.
+    "linear_start": 0.00085,
+    "linear_end": 0.0120,
 
-    first_stage_config:
-      target: ldm.models.autoencoder.AutoencoderKL
-      params:
-        embed_dim: 4
-        monitor: val/rec_loss
-        ddconfig:
-          double_z: true
-          z_channels: 4
-          resolution: 256
-          in_channels: 3
-          out_ch: 3
-          ch: 128
-          ch_mult:
-          - 1
-          - 2
-          - 4
-          - 4
-          num_res_blocks: 2
-          attn_resolutions: []
-          dropout: 0.0
-        lossconfig:
-          target: torch.nn.Identity
+    # Number of conditioning timesteps.
+    "num_timesteps_cond": 1,
 
-    cond_stage_config:
-      target: ldm.modules.encoders.modules.FrozenCLIPEmbedder
-      params:
-        layer: "hidden"
-        layer_idx: -2
+    # Log progress every n steps.
+    "log_every_t": 200,
+
+    # Number of timesteps.
+    "timesteps": 1000,
+
+    # Key for the first stage of the model.
+    "first_stage_key": "jpg",
+
+    # Key for the conditioning stage of the model.
+    "cond_stage_key": "txt",
+
+    # Image size.
+    "image_size": 64,
+
+    # Number of channels.
+    "channels": 4,
+
+    # Whether the conditioning stage is trainable.
+    "cond_stage_trainable": False,
+
+    # Conditioning key.
+    "conditioning_key": "crossattn",
+
+    # Monitor for evaluation metric.
+    "monitor": "val/loss_simple_ema",
+
+    # Scale factor.
+    "scale_factor": 0.18215,
+
+    # Whether to use exponential moving average.
+    "use_ema": False,
+
+    # Configuration for the learning rate scheduler.
+    "scheduler_config": {
+      # Target scheduler.
+      "target": "ldm.lr_scheduler.LambdaLinearScheduler",
+
+      # Parameters for the target scheduler.
+      "params": {
+        # Warmup steps.
+        "warm_up_steps": [10000],
+
+        # Cycle lengths.
+        "cycle_lengths": [10000000000000],
+
+        # Coefficients for the learning rate.
+        "f_start": [1.e-6],
+        "f_max": [1.],
+        "f_min": [1.],
+      }
+    },
+
+    # Configuration for the U-Net model.
+    "unet_config": {
+      # Target U-Net model.
+      "target": "ldm.modules.diffusionmodules.openaimodel.UNetModel",
+
+      # Parameters for the target U-Net model.
+      "params": {
+        # Whether to use float16.
+        "use_fp16": True,
+
+        # Unused image size.
+        "image_size": 32,
+
+        # Number of input channels.
+        "in_channels": 4,
+
+        # Number of output channels.
+        "out_channels": 4,
+
+        # Number of channels in the U-Net.
+        "model_channels": 320,
+
+        # Attention resolutions.
+        "attention_resolutions": [4, 2, 1],
+
+        # Number of residual blocks.
+        "num_res_blocks": 2,
+
+        # Channel multiplier.
+        "channel_mult": [1, 2, 4, 4],
+
+        # Number of attention heads.
+        "num_heads": 8,
+
+        # Whether to use spatial transformer.
+        "use_spatial_transformer": True,
+
+        # Transformer depth.
+        "transformer_depth": 1,
+
+        # Context dimension.
+        "context_dim": 768,
+
+        # Whether to use model checkpointing.
+        "use_checkpoint": True,
+
+        # Legacy mode.
+        "legacy": False,
+      }
+    },
+
+    # Configuration for the first stage of the model.
+    "first_stage_config": {
+      # Target autoencoder model.
+      "target": "ldm.models.autoencoder.AutoencoderKL",
+
+      # Parameters for the target autoencoder model.
+      "params": {
+        # Embedding dimension.
+        "embed_dim": 4,
+
+        # Monitor for evaluation metric.
+        "monitor": "val/rec_loss",
+
+        # Configuration for the diffusion decoder.
+        "ddconfig": {
+          # Whether to double the z dimension.
+          "double_z": True,
+
+          # Number of z channels.
+          "z_channels": 4,
+
+          # Image resolution.
+          "resolution": 256,
+
+          # Number of input channels.
+          "in_channels": 3,
+
+          # Number of output channels.
+          "out_ch": 3,
+
+          # Number of channels.
+          "ch": 128,
+
+          # Channel multiplier.
+          "ch_mult": [1, 2, 4, 4],
+
+          # Number of residual blocks.
+          "num_res_blocks": 2,
+
+          # Attention resolutions.
+          "attn_resolutions": [],
+
+          # Dropout rate.
+          "dropout": 0.0,
+        },
+
+        # Configuration for the loss function.
+        "lossconfig": {
+          # Target loss function.
+          "target": "torch.nn.Identity",
+        }
+      }
+    },
+
+    # Configuration for the conditioning stage of the model.
+    "cond_stage_config": {
+      # Target embedder model.
+      "target": "ldm.modules.encoders.modules.FrozenCLIPEmbedder",
+
+      # Parameters for the target embedder model.
+      "params": {
+        # Layer to use for the embeddings.
+        "layer": "hidden",
+
+        # Index of the layer to use for the embeddings.
+        "layer_idx": -2,
+      }
+    },
+  }
+}
