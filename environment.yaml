@@ -1,6 +1,18 @@
+# This is a conda environment file for a project named "fooocus".
+
+# The "name" field specifies the name of the environment. In this case, the name is "fooocus".
 name: fooocus
+
+# The "channels" field specifies the channels from which conda will search for packages.
+# Here, we are using the "defaults" channel, which is a built-in channel that contains the most commonly used packages.
 channels:
   - defaults
+
+# The "dependencies" field specifies the packages that will be installed in the environment.
+# Here, we have specified three dependencies:
+# - python=3.10: This specifies that we want to use Python version 3.10 in this environment.
+# - pip=23.0: This specifies that we want to use pip version 23.0 in this environment.
+# - packaging: This is a Python package that provides utilities for creating, reading, and writing metadata for Python packages.
 dependencies:
   - python=3.10
   - pip=23.0
